@@ -1,0 +1,189 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}e-sports.tn{% endblock %}
+
+{% block body %}
+
+<!-- breadcrumb start -->
+<section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb_iner text-center">
+                    <div class="breadcrumb_iner_item">
+                        <h2>Our Products</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- breadcrumb end -->
+
+<style>
+    :root {
+        --g-black: #000000;
+        --g-blue: #054397;
+        --g-purple: #a52bf9;
+        --g-red: #ff0000;
+        --g-cream: #FDF5E7;
+        --card-white: #ffffff;
+    }
+
+    .gaming-shop-wrapper {
+        background: radial-gradient(circle at 10% 10%, rgba(5, 67, 151, 0.2), var(--g-black) 45%),
+                    radial-gradient(circle at 90% 90%, rgba(165, 43, 249, 0.2), var(--g-blue) 45%),
+                    radial-gradient(circle at 90% 90%, rgba(165, 43, 249, 0.2), var(--g-red) 45%);
+        background-color: var(--g-black);
+        padding: 80px 0;
+        color: var(--g-cream);
+        font-family: 'Open Sans', sans-serif;
+    }
+
+    .gaming-sidebar {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 25px;
+    }
+
+    .category-item {
+        color: var(--g-cream) !important;
+        padding: 12px 15px;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+        text-decoration: none;
+        transition: 0.3s;
+        margin-bottom: 5px;
+    }
+
+    .category-item:hover {
+        background: var(--g-blue);
+        box-shadow: 0 0 15px var(--g-blue);
+    }
+
+    .gaming-card-white {
+        background: var(--card-white);
+        border-radius: 20px;
+        overflow: hidden;
+        border: none;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .gaming-card-white:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(165, 43, 249, 0.4);
+    }
+
+    .gaming-card-white img {
+        width: 100%;
+        border: none !important;
+        border-radius: 16px;
+        transition: transform 0.4s ease;
+    }
+
+    .gaming-card-white:hover img {
+        transform: scale(1.05);
+    }
+
+    .gaming-card-white h4 {
+        color: #111 !important;
+        font-weight: 800;
+        margin-top: 15px;
+    }
+
+    .gaming-card-white p {
+        color: #555 !important;
+        font-size: 0.85rem;
+    }
+
+    .price-text {
+        color: var(--g-black);
+        font-weight: 800;
+        font-size: 1.4rem;
+    }
+
+    .btn-buy {
+        background: linear-gradient(45deg, var(--g-blue), var(--g-purple));
+        border: none;
+        color: white;
+        border-radius: 50px;
+        padding: 8px 20px;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+
+    .btn-buy:hover {
+        filter: brightness(1.2);
+        box-shadow: 0 0 15px var(--g-purple);
+        color: white;
+    }
+</style>
+
+<div class="container-fluid gaming-shop-wrapper">
+    <div class="container">
+        <div class="row mb-5 align-items-center">
+            <div class="col-md-6">
+                <h6 class="text-uppercase" style="color: var(--g-purple); letter-spacing: 4px;">Hardware Depot</h6>
+                <h2 class="display-5 fw-bold text-white">GAMING GEAR</h2>
+            </div>
+            <div class="col-md-6 text-md-end">
+               <div class="input-group w-75 ms-auto">
+    <form method="get" action="{{ path('app_product_index2') }}" class="d-flex w-100">
+        <input type="text" name="search" value="{{ searchTerm|default('') }}" class="form-control bg-dark text-white border-0" placeholder="Search gear...">
+        <button class="btn btn-primary border-0" style="background: var(--g-cream);">
+            <i class="fas fa-search"></i>
+        </button>
+    </form>
+</div>
+
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Sidebar -->
+            <div class="col-lg-3">
+                <div class="gaming-sidebar">
+                    <h4 class="mb-4 text-white">CATEGORIES</h4>
+                    <nav>
+                        {% for category in categories %}
+                            <a href="{{ path('app_product_by_category_index2', {id: category.id}) }}" class="category-item">
+                                <span>{{ category.name }}</span>
+                                <span class="badge bg-dark">{{ category.products|length }}</span>
+                            </a>
+                        {% endfor %}
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Products -->
+            <div class="col-lg-9">
+                <div class="row g-4">
+                    {% for product in products %}
+                        <div class="col-md-6 col-xl-4">
+                            <div class="gaming-card-white h-100 p-3">
+                                <img src="{{ product.image }}" class="img-fluid rounded-4" alt="{{ product.name }}">
+                                <div class="text-center">
+                                    <h4>{{ product.name }}</h4>
+                                    <p>{{ product.description }}</p>
+                                    <p><strong>Category:</strong> {{ product.category.name }}</p>
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <span class="price-text">{{ product.price }} TND</span>
+                                        <a href="#" class="btn-buy">ADD</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p class="text-white">No products available.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
