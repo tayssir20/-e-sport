@@ -1,0 +1,4 @@
+# Auto-discover routes from controller attributes
+controllers:
+    resource: ../../src/Controller/
+    type: attribute
