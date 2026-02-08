@@ -3,8 +3,9 @@
 namespace App\Entity;
 
 use App\Repository\TournoiRepository;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
+use App\Entity\Equipe;
 
 #[ORM\Entity(repositoryClass: TournoiRepository::class)]
 class Tournoi
@@ -17,23 +18,43 @@ class Tournoi
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $type = null;
-
-    #[ORM\Column(name: "date_début", type: Types::DATE_MUTABLE)]
+    #[ORM\Column]
     private ?\DateTime $date_debut = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTime $date_fin = null;
-
     #[ORM\Column]
-    private ?int $max_participants = null;
+    private ?\DateTime $date_fin = null;
 
     #[ORM\Column(length: 255)]
     private ?string $statut = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $type = null;
+
     #[ORM\ManyToOne(inversedBy: 'tournois')]
     private ?Jeu $jeu = null;
+
+    #[ORM\ManyToMany(targetEntity: Equipe::class, mappedBy: 'Tournois')]
+    private Collection $equipes;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $maxParticipants = null;
+
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $participants = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTime $dateInscriptionLimite = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $fraisInscription = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $description = null;
+
+    public function __construct()
+    {
+        $this->equipes = new \Doctrine\Common\Collections\ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -48,18 +69,6 @@ class Tournoi
     public function setNom(string $nom): static
     {
         $this->nom = $nom;
-
-        return $this;
-    }
-
-    public function getType(): ?string
-    {
-        return $this->type;
-    }
-
-    public function setType(string $type): static
-    {
-        $this->type = $type;
 
         return $this;
     }
@@ -88,18 +97,6 @@ class Tournoi
         return $this;
     }
 
-    public function getMaxParticipants(): ?int
-    {
-        return $this->max_participants;
-    }
-
-    public function setMaxParticipants(int $max_participants): static
-    {
-        $this->max_participants = $max_participants;
-
-        return $this;
-    }
-
     public function getStatut(): ?string
     {
         return $this->statut;
@@ -108,6 +105,18 @@ class Tournoi
     public function setStatut(string $statut): static
     {
         $this->statut = $statut;
+
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): static
+    {
+        $this->type = $type;
 
         return $this;
     }
@@ -124,62 +133,87 @@ class Tournoi
         return $this;
     }
 
-    /**
-     * Compatibility helper for templates: return participants collection or empty array.
-     * If you later implement a Participant entity/relation, replace this with the real collection.
-     *
-     * @return array
-     */
-    public function getParticipants(): array
+    public function getEquipes(): Collection
     {
-        return [];
+        return $this->equipes;
     }
 
-    /**
-     * Compatibility getter for optional registration deadline.
-     * Returns null by default; implement a real field if needed.
-     */
+    public function addEquipe(Equipe $equipe): static
+    {
+        if (!$this->equipes->contains($equipe)) {
+            $this->equipes->add($equipe);
+            $equipe->addTournoi($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEquipe(Equipe $equipe): static
+    {
+        if ($this->equipes->removeElement($equipe)) {
+            $equipe->removeTournoi($this);
+        }
+
+        return $this;
+    }
+
+    public function getMaxParticipants(): ?int
+    {
+        return $this->maxParticipants;
+    }
+
+    public function setMaxParticipants(?int $maxParticipants): static
+    {
+        $this->maxParticipants = $maxParticipants;
+
+        return $this;
+    }
+
+    public function getParticipants(): ?int
+    {
+        return $this->participants;
+    }
+
+    public function setParticipants(?int $participants): static
+    {
+        $this->participants = $participants;
+
+        return $this;
+    }
+
     public function getDateInscriptionLimite(): ?\DateTime
     {
-        return null;
+        return $this->dateInscriptionLimite;
     }
-    /**
-     * Compatibility getter for optional registration fee.
-     */
+
+    public function setDateInscriptionLimite(?\DateTime $dateInscriptionLimite): static
+    {
+        $this->dateInscriptionLimite = $dateInscriptionLimite;
+
+        return $this;
+    }
+
     public function getFraisInscription(): ?float
     {
-        return null;
+        return $this->fraisInscription;
     }
 
-    /**
-     * Compatibility getter for optional prize pool.
-     */
-    public function getCagnotte(): ?float
+    public function setFraisInscription(?float $fraisInscription): static
     {
-        return null;
+        $this->fraisInscription = $fraisInscription;
+
+        return $this;
     }
 
-    /**
-     * Compatibility getter for optional format description.
-     */
-    public function getFormat(): ?string
-    {
-        return null;
-    }
-
-    /**
-     * Compatibility getter for optional rules text.
-     */
-    public function getRegles(): ?string
-    {
-        return null;
-    }
-
-    /**
-     * Compatibility getter for optional description.
-     */
     public function getDescription(): ?string
     {
-        return null;
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+
+        return $this;
     }
 }

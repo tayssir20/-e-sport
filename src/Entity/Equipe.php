@@ -20,7 +20,7 @@ class Equipe
     #[ORM\ManyToMany(targetEntity: User::class)]
     private Collection $members;
 
-    #[ORM\ManyToMany(targetEntity: Tournoi::class)]
+    #[ORM\ManyToMany(targetEntity: Tournoi::class, inversedBy: 'equipes')]
     private Collection $Tournois;
     #[ORM\Column(type: 'integer')]
     private int $maxMembers = 5;

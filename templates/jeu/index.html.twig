@@ -1,0 +1,173 @@
+{# templates/jeu/index.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Jeux - e-Sports{% endblock %}
+
+{% block body %}
+<section class="games-section">
+    <div class="container">
+        <div class="section-header">
+            <h1>Nos Jeux</h1>
+            <p>Découvrez les jeux où vous pouvez compétitionner</p>
+        </div>
+
+        <div class="games-grid">
+            {% for jeu in jeux %}
+                {# build a slug from the game name to locate an image in public/img/games/ #}
+                {% set slug = jeu.nom ? (jeu.nom|lower|replace({' ':'-','_':''})) : 'placeholder' %}
+                {% set imagePath = 'img/games/' ~ slug ~ '.png' %}
+
+                <div class="game-card">
+                    <div class="game-image">
+                        <img src="{{ asset(imagePath) }}" alt="{{ jeu.nom }}" onerror="this.style.display='none'">
+                        {% if not jeu.nom %}
+                            <div class="placeholder-image">No name</div>
+                        {% endif %}
+                        <span class="game-badge">{{ jeu.genre }}</span>
+                    </div>
+                    <div class="game-info">
+                        <h3>{{ jeu.nom }}</h3>
+                        <p class="publisher">{{ jeu.plateforme ?: '—' }}</p>
+                        <p class="description">{{ jeu.description ? (jeu.description|slice(0, 100) ~ '...') : '' }}</p>
+                        <p class="release-date">{{ jeu.statut ?: '' }}</p>
+                        <a href="{{ path('app_jeu_show', {'id': jeu.id}) }}" class="btn-primary">Voir les tournois</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<style>
+    .games-section {
+        padding: 60px 20px;
+        background: linear-gradient(135deg, #0f0c29, #302b63);
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 50px;
+        color: white;
+    }
+
+    .section-header h1 {
+        font-size: 3em;
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, #ff006e, #8338ec);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .games-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 30px;
+    }
+
+    .game-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .game-card:hover {
+        transform: translateY(-10px);
+        border-color: #ff006e;
+        box-shadow: 0 20px 40px rgba(255, 0, 110, 0.2);
+    }
+
+    .game-image {
+        position: relative;
+        height: 250px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #ff006e, #8338ec);
+    }
+
+    .game-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .game-card:hover .game-image img {
+        transform: scale(1.1);
+    }
+
+    .placeholder-image {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+
+    .game-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.85em;
+    }
+
+    .game-info {
+        padding: 25px;
+        color: white;
+    }
+
+    .game-info h3 {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+        margin-top: 0;
+    }
+
+    .publisher {
+        color: #ff006e;
+        font-size: 0.9em;
+        margin: 5px 0;
+    }
+
+    .description {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.95em;
+        margin: 15px 0;
+        line-height: 1.5;
+    }
+
+    .release-date {
+        font-size: 0.85em;
+        color: rgba(255, 255, 255, 0.5);
+        margin: 10px 0;
+    }
+
+    .btn-primary {
+        display: inline-block;
+        background: linear-gradient(135deg, #ff006e, #8338ec);
+        color: white;
+        padding: 12px 30px;
+        border-radius: 25px;
+        text-decoration: none;
+        margin-top: 15px;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .btn-primary:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 25px rgba(255, 0, 110, 0.3);
+    }
+</style>
+{% endblock %}

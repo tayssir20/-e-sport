@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20260207225745 extends AbstractMigration
+final class Version20260208044415 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -29,7 +29,9 @@ final class Version20260207225745 extends AbstractMigration
         $this->addSql('CREATE TABLE jeu (id INT AUTO_INCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, genre VARCHAR(255) NOT NULL, plateforme VARCHAR(255) NOT NULL, description VARCHAR(255) NOT NULL, statut VARCHAR(255) NOT NULL, PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE match_game (id INT AUTO_INCREMENT NOT NULL, date_match DATETIME NOT NULL, score_team1 INT NOT NULL, score_team2 INT NOT NULL, statut VARCHAR(50) NOT NULL, equipe1_id INT NOT NULL, equipe2_id INT NOT NULL, tournoi_id INT NOT NULL, INDEX IDX_424480FE4265900C (equipe1_id), INDEX IDX_424480FE50D03FE2 (equipe2_id), INDEX IDX_424480FEF607770A (tournoi_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE product (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(255) NOT NULL, description LONGTEXT NOT NULL, price DOUBLE PRECISION NOT NULL, stock INT NOT NULL, image VARCHAR(255) NOT NULL, category_id INT NOT NULL, INDEX IDX_D34A04AD12469DE2 (category_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
-        $this->addSql('CREATE TABLE tournoi (id INT AUTO_INCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, type VARCHAR(255) NOT NULL, date_début DATE NOT NULL, date_fin DATE NOT NULL, max_participants INT NOT NULL, statut VARCHAR(255) NOT NULL, jeu_id INT DEFAULT NULL, INDEX IDX_18AFD9DF8C9E392E (jeu_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('CREATE TABLE ranking (id INT AUTO_INCREMENT NOT NULL, nm VARCHAR(255) NOT NULL, PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('CREATE TABLE result (id INT AUTO_INCREMENT NOT NULL, m VARCHAR(255) NOT NULL, PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('CREATE TABLE tournoi (id INT AUTO_INCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, date_debut DATETIME NOT NULL, date_fin DATETIME NOT NULL, statut VARCHAR(255) NOT NULL, type VARCHAR(255) NOT NULL, max_participants INT DEFAULT NULL, participants INT DEFAULT NULL, date_inscription_limite DATETIME DEFAULT NULL, frais_inscription DOUBLE PRECISION DEFAULT NULL, description LONGTEXT DEFAULT NULL, jeu_id INT DEFAULT NULL, INDEX IDX_18AFD9DF8C9E392E (jeu_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE `user` (id INT AUTO_INCREMENT NOT NULL, email VARCHAR(180) NOT NULL, roles JSON NOT NULL, password VARCHAR(255) NOT NULL, nom VARCHAR(100) NOT NULL, role VARCHAR(50) NOT NULL, UNIQUE INDEX UNIQ_8D93D649E7927C74 (email), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE messenger_messages (id BIGINT AUTO_INCREMENT NOT NULL, body LONGTEXT NOT NULL, headers LONGTEXT NOT NULL, queue_name VARCHAR(190) NOT NULL, created_at DATETIME NOT NULL, available_at DATETIME NOT NULL, delivered_at DATETIME DEFAULT NULL, INDEX IDX_75EA56E0FB7336F0E3BD61CE16BA31DBBF396750 (queue_name, available_at, delivered_at, id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('ALTER TABLE cart ADD CONSTRAINT FK_BA388B7A76ED395 FOREIGN KEY (user_id) REFERENCES `user` (id)');
@@ -72,6 +74,8 @@ final class Version20260207225745 extends AbstractMigration
         $this->addSql('DROP TABLE jeu');
         $this->addSql('DROP TABLE match_game');
         $this->addSql('DROP TABLE product');
+        $this->addSql('DROP TABLE ranking');
+        $this->addSql('DROP TABLE result');
         $this->addSql('DROP TABLE tournoi');
         $this->addSql('DROP TABLE `user`');
         $this->addSql('DROP TABLE messenger_messages');

@@ -33,7 +33,7 @@ class Jeu
     /**
      * @var Collection<int, Tournoi>
      */
-    #[ORM\OneToMany(targetEntity: Tournoi::class, mappedBy: 'jeu', cascade: ['remove'])]
+    #[ORM\OneToMany(targetEntity: Tournoi::class, mappedBy: 'jeu')]
     private Collection $tournois;
 
     public function __construct()

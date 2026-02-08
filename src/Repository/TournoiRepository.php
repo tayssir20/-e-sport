@@ -17,7 +17,7 @@ class TournoiRepository extends ServiceEntityRepository
     }
 
     //    /**
-    //     * @return Tournament[] Returns an array of Tournament objects
+    //     * @return Tournoi[] Returns an array of Tournoi objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -40,4 +40,15 @@ class TournoiRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+    public function findOneWithJeu(int $id): ?Tournoi
+    {
+        return $this->createQueryBuilder('t')
+            ->leftJoin('t.jeu', 'j')
+            ->addSelect('j')
+            ->andWhere('t.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
 }

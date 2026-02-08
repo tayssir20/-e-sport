@@ -339,7 +339,7 @@ body {
                 {% elseif match_game.statut == 'In Progress' %}
                     <span class="status-badge status-progress">In Progress</span>
                 {% else %}
-                    <span class="status-badge status-pending">Pending</span>
+                    <span class="status-badge status-pending">{{ match_game.statut }}</span>
                 {% endif %}
             </div>
         </div>

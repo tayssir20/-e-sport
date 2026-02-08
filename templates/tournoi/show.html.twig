@@ -1,0 +1,375 @@
+{# templates/tournoi/show.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ tournoi.nom }} - e-Sports{% endblock %}
+
+{% block body %}
+<section class="tournament-detail">
+    <div class="container">
+        <div class="tournament-detail-header">
+            <div class="tournament-detail-left">
+                <h1>{{ tournoi.nom }}</h1>
+                <p class="game-badge">{{ tournoi.jeu.nom }}</p>
+                <span class="status status-{{ tournoi.statut }}">{{ tournoi.statut }}</span>
+            </div>
+            <div class="tournament-detail-right">
+                <div class="cta-button">
+                    <a href="{{ path('app_tournoi_register', {'id': tournoi.id}) }}" class="btn-register">S'inscrire</a>
+                    {% set current = tournoi.equipes ? tournoi.equipes|length : 0 %}
+                    {% set max = tournoi.maxParticipants ?: 0 %}
+                    <p class="places">Places disponibles: {{ max > 0 ? (max - current) : '—' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="tournament-info">
+    <div class="container">
+        <div class="info-grid">
+            <div class="info-card">
+                <h4>Dates du tournoi</h4>
+                <p>
+                    <strong>Début:</strong><br>
+                    {{ tournoi.dateDebut|date('d M Y à H:i') }}
+                </p>
+                <p>
+                    <strong>Fin:</strong><br>
+                    {{ tournoi.dateFin|date('d M Y à H:i') }}
+                </p>
+            </div>
+
+            <div class="info-card">
+                <h4>Inscription</h4>
+                <p>
+                    <strong>Limite:</strong><br>
+                    {{ tournoi.dateInscriptionLimite|date('d M Y à H:i') }}
+                </p>
+            </div>
+
+            <div class="info-card">
+                <h4>Participants</h4>
+                {% set current = tournoi.equipes ? tournoi.equipes|length : 0 %}
+                {% set max = tournoi.maxParticipants ?: 0 %}
+                <div class="progress-bar">
+                    <div class="progress" style="width: {{ max > 0 ? ((current / max) * 100) : 0 }}%"></div>
+                </div>
+                <p>{{ current }} / {{ max ?: '—' }}</p>
+            </div>
+
+            <div class="info-card">
+                <h4>Prize Pool</h4>
+                <p class="amount">{{ tournoi.cagnotte|default('0') }}€</p>
+                {% if tournoi.fraisInscription %}
+                    <p class="fee">Frais: {{ tournoi.fraisInscription }}€</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="tournament-details">
+    <div class="container">
+        <div class="details-grid">
+            <div class="details-left">
+                <div class="detail-section">
+                    <h3>À propos du tournoi</h3>
+                    <p>{{ tournoi.description }}</p>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Format</h3>
+                    <p>{{ tournoi.format|default('Non spécifié') }}</p>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Règles</h3>
+                    <p>{{ tournoi.regles|default('Aucune règle spécifiée') }}</p>
+                </div>
+            </div>
+
+            <div class="details-right">
+                <div class="registration-card">
+                    <h3>Détails d'inscription</h3>
+                    <div class="price-box">
+                        <span class="price-label">Frais d'inscription</span>
+                        <span class="price-value">{{ tournoi.fraisInscription|default('Gratuit') }}</span>
+                    </div>
+                    <div class="features">
+                        <div class="feature">
+                            <span class="check">✓</span>
+                            <span>Accès au discord du tournoi</span>
+                        </div>
+                        <div class="feature">
+                            <span class="check">✓</span>
+                            <span>Soutien en temps réel</span>
+                        </div>
+                        <div class="feature">
+                            <span class="check">✓</span>
+                            <span>Certificat de participation</span>
+                        </div>
+                    </div>
+                    <a href="{{ path('app_tournoi_register', {'id': tournoi.id}) }}" class="btn-register-large">S'inscrire maintenant</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .tournament-detail {
+        background: linear-gradient(135deg, #ff006e, #8338ec, #3a0f5c);
+        padding: 80px 20px;
+        color: white;
+    }
+
+    .tournament-detail-header {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 50px;
+        align-items: center;
+    }
+
+    .tournament-detail-left h1 {
+        font-size: 3.5em;
+        margin: 0 0 20px 0;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .game-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 8px 20px;
+        border-radius: 20px;
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
+
+    .status {
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-weight: bold;
+        text-transform: capitalize;
+    }
+
+    .status-en_attente {
+        background: rgba(255, 193, 7, 0.3);
+        color: #ffc107;
+    }
+
+    .status-en_cours {
+        background: rgba(33, 150, 243, 0.3);
+        color: #2196f3;
+    }
+
+    .status-terminé {
+        background: rgba(76, 175, 80, 0.3);
+        color: #4caf50;
+    }
+
+    .cta-button {
+        text-align: center;
+    }
+
+    .btn-register {
+        display: inline-block;
+        background: white;
+        color: #ff006e;
+        padding: 15px 50px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 1.1em;
+        transition: all 0.3s ease;
+        border: 2px solid white;
+    }
+
+    .btn-register:hover {
+        background: transparent;
+        color: white;
+    }
+
+    .places {
+        margin-top: 15px;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .tournament-info {
+        background: #0f0c29;
+        padding: 60px 20px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+    }
+
+    .info-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 25px;
+        color: white;
+    }
+
+    .info-card h4 {
+        margin: 0 0 15px 0;
+        color: #ff006e;
+    }
+
+    .info-card p {
+        margin: 10px 0;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .amount {
+        font-size: 2em;
+        font-weight: bold;
+        color: #4caf50;
+    }
+
+    .fee {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9em;
+    }
+
+    .progress-bar {
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 15px 0;
+    }
+
+    .progress {
+        height: 100%;
+        background: linear-gradient(90deg, #ff006e, #8338ec);
+        transition: width 0.3s ease;
+    }
+
+    .tournament-details {
+        background: #0f0c29;
+        padding: 60px 20px;
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 40px;
+    }
+
+    .detail-section {
+        margin-bottom: 40px;
+        color: white;
+    }
+
+    .detail-section h3 {
+        font-size: 1.5em;
+        margin-bottom: 15px;
+        color: #ff006e;
+    }
+
+    .detail-section p {
+        line-height: 1.8;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .registration-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 30px;
+        color: white;
+        position: sticky;
+        top: 20px;
+    }
+
+    .registration-card h3 {
+        margin-top: 0;
+        color: #ff006e;
+    }
+
+    .price-box {
+        background: rgba(255, 0, 110, 0.1);
+        border-radius: 10px;
+        padding: 15px;
+        margin: 20px 0;
+        text-align: center;
+    }
+
+    .price-label {
+        display: block;
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 5px;
+    }
+
+    .price-value {
+        display: block;
+        font-size: 2em;
+        font-weight: bold;
+        color: #ff006e;
+    }
+
+    .features {
+        margin: 25px 0;
+    }
+
+    .feature {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .check {
+        color: #4caf50;
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+
+    .btn-register-large {
+        display: inline-block;
+        width: 100%;
+        background: linear-gradient(135deg, #ff006e, #8338ec);
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        border: none;
+        font-weight: bold;
+        font-size: 1em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+        text-align: center;
+        text-decoration: none;
+        box-sizing: border-box;
+    }
+
+    .btn-register-large:hover {
+        transform: scale(1.02);
+        box-shadow: 0 15px 35px rgba(255, 0, 110, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .tournament-detail-header {
+            grid-template-columns: 1fr;
+        }
+
+        .tournament-detail-left h1 {
+            font-size: 2.5em;
+        }
+
+        .details-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .registration-card {
+            position: static;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,270 @@
+{# templates/jeu/show.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ jeu.nom }} - e-Sports{% endblock %}
+
+{% block body %}
+<section class="game-detail">
+    <div class="container">
+        <div class="game-detail-header">
+            <div class="game-detail-image">
+                {# determine image path from game name (slug) and show it with graceful fallback #}
+                {% set slug = jeu.nom ? (jeu.nom|lower|replace({' ':'-','_':''})) : 'placeholder' %}
+                {% set imagePath = 'img/games/' ~ slug ~ '.png' %}
+                <img src="{{ asset(imagePath) }}" alt="{{ jeu.nom }}" onerror="this.style.display='none'">
+                {% if not jeu.nom %}
+                    <div class="placeholder-image-large">{{ jeu.nom }}</div>
+                {% endif %}
+            </div>
+            <div class="game-detail-info">
+                <h1>{{ jeu.nom }}</h1>
+                <p class="publisher">{{ jeu.plateforme ?: '—' }}</p>
+                <p class="genre">Genre: <span>{{ jeu.genre }}</span></p>
+                <p class="release">Statut: <span>{{ jeu.statut }}</span></p>
+                <p class="description">{{ jeu.description }}</p>
+                <div class="stats">
+                    <div class="stat">
+                        <span class="stat-number">{{ jeu.tournois|length }}</span>
+                        <span class="stat-label">Tournois actifs</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="tournaments-section">
+    <div class="container">
+        <h2>Tournois disponibles</h2>
+        
+        {% if jeu.tournois|length > 0 %}
+            <div class="tournaments-grid">
+                {% for tournoi in jeu.tournois %}
+                    <div class="tournament-card">
+                        <div class="tournament-header">
+                            <h3>{{ tournoi.nom }}</h3>
+                            <span class="status status-{{ tournoi.statut }}">{{ tournoi.statut }}</span>
+                        </div>
+                        <div class="tournament-details">
+                            <p><strong>Dates:</strong> {{ tournoi.dateDebut|date('d/m/Y') }} - {{ tournoi.dateFin|date('d/m/Y') }}</p>
+                            <p><strong>Participants:</strong> {{ tournoi.participants ? tournoi.participants|length : 0 }}/{{ tournoi.maxParticipants }}</p>
+                        </div>
+                        <a href="{{ path('app_tournoi_show', {'id': tournoi.id}) }}" class="btn-secondary">Détails</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-tournaments">Aucun tournoi disponible pour ce jeu.</p>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+    .game-detail {
+        background: linear-gradient(135deg, #0f0c29, #302b63);
+        padding: 60px 20px;
+    }
+
+    .game-detail-header {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 50px;
+        align-items: center;
+        color: white;
+    }
+
+    .game-detail-image {
+        border-radius: 15px;
+        overflow: hidden;
+        height: 400px;
+    }
+
+    .game-detail-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .placeholder-image-large {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #ff006e, #8338ec);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2em;
+        font-weight: bold;
+    }
+
+    .game-detail-info h1 {
+        font-size: 3em;
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, #ff006e, #8338ec);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .publisher {
+        color: #ff006e;
+        font-size: 1.1em;
+        margin-bottom: 15px;
+    }
+
+    .genre, .release {
+        font-size: 0.95em;
+        color: rgba(255, 255, 255, 0.7);
+        margin: 10px 0;
+    }
+
+    .genre span, .release span {
+        color: white;
+        font-weight: bold;
+    }
+
+    .description {
+        font-size: 1em;
+        line-height: 1.8;
+        margin-top: 25px;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .stats {
+        display: flex;
+        gap: 40px;
+        margin-top: 30px;
+        padding-top: 30px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-number {
+        font-size: 2em;
+        font-weight: bold;
+        color: #ff006e;
+    }
+
+    .stat-label {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9em;
+    }
+
+    .tournaments-section {
+        padding: 60px 20px;
+        background: #0f0c29;
+    }
+
+    .tournaments-section h2 {
+        color: white;
+        font-size: 2.5em;
+        margin-bottom: 40px;
+        text-align: center;
+    }
+
+    .tournaments-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 30px;
+    }
+
+    .tournament-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 25px;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .tournament-card:hover {
+        transform: translateY(-5px);
+        border-color: #ff006e;
+        box-shadow: 0 15px 35px rgba(255, 0, 110, 0.2);
+    }
+
+    .tournament-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 20px;
+    }
+
+    .tournament-header h3 {
+        margin: 0;
+        font-size: 1.3em;
+    }
+
+    .status {
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.8em;
+        font-weight: bold;
+    }
+
+    .status-en_attente {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+    }
+
+    .status-en_cours {
+        background: rgba(33, 150, 243, 0.2);
+        color: #2196f3;
+    }
+
+    .status-terminé {
+        background: rgba(76, 175, 80, 0.2);
+        color: #4caf50;
+    }
+
+    .tournament-details {
+        margin-bottom: 20px;
+    }
+
+    .tournament-details p {
+        margin: 10px 0;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.95em;
+    }
+
+    .btn-secondary {
+        display: inline-block;
+        background: rgba(255, 0, 110, 0.2);
+        color: #ff006e;
+        padding: 10px 25px;
+        border-radius: 20px;
+        text-decoration: none;
+        border: 1px solid #ff006e;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        background: #ff006e;
+        color: white;
+    }
+
+    .no-tournaments {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.6);
+        padding: 40px;
+    }
+
+    @media (max-width: 768px) {
+        .game-detail-header {
+            grid-template-columns: 1fr;
+        }
+
+        .game-detail-info h1 {
+            font-size: 2em;
+        }
+
+        .tournaments-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

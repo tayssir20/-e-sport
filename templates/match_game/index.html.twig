@@ -369,7 +369,7 @@ body {
                     </div>
 
                     <!-- Center -->
-                    {% if match_game.statut != 'Pending' %}
+                    {% if match_game.statut == 'Finished' or match_game.statut == 'In Progress' %}
                         <div class="score-badge">
                             {{ match_game.scoreTeam1 }} - {{ match_game.scoreTeam2 }}
                         </div>
@@ -389,7 +389,7 @@ body {
                 <!-- FOOTER -->
                 <div class="card-footer">
                     <!-- Status -->
-                    <div class="status-indicator status-{{ match_game.statut|lower|replace({' ': '-'}) }}">
+                    <div class="status-indicator status-{{ match_game.statut|lower|replace({' ': '-'}) == 'scheduled' ? 'pending' : match_game.statut|lower|replace({' ': '-'}) }}">
                         <div class="status-dot"></div>
                         <span>{{ match_game.statut }}</span>
                     </div>

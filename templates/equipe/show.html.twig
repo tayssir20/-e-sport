@@ -1,5 +1,5 @@
 
-{% block title %}{{ equipe.name }}{% endblock %}
+{% block title %}{{ equipe.nom }}{% endblock %}
 
 {% block body %}
 <style>
@@ -27,7 +27,7 @@
 </style>
 
 <div class="container">
-    <h1 class="page-title">🏆 {{ equipe.name }}</h1>
+    <h1 class="page-title">🏆 {{ equipe.nom }}</h1>
 
     <div class="equipe-card">
         <div class="equipe-info">
@@ -37,7 +37,7 @@
             </div>
             <div class="info-row">
                 <span class="info-label">Team Name</span>
-                <span class="info-value">{{ equipe.name }}</span>
+                <span class="info-value">{{ equipe.nom }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Owner</span>
@@ -46,10 +46,10 @@
             <div class="info-row">
                 <span class="info-label">Tournaments</span>
                 <span class="info-value">
-                    {% if equipe.tournaments|length > 0 %}
+                    {% if equipe.tournois|length > 0 %}
                         <div class="items-list">
-                        {% for tournament in equipe.tournaments %}
-                            <span class="badge badge-tournament">{{ tournament.name }}</span>
+                        {% for tournament in equipe.tournois %}
+                            <span class="badge badge-tournament">{{ tournament.nom }}</span>
                         {% endfor %}
                         </div>
                     {% else %}
