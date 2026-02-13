@@ -3,8 +3,7 @@
         margin-bottom: 1.5rem;
     }
 
-    .admin-form .form-control,
-    .admin-form .form-select {
+    .admin-form .form-control {
         color: #e2e8f0;
         background: rgba(30, 41, 59, 0.5);
         border: 1px solid rgba(148, 163, 184, 0.2);
@@ -12,15 +11,14 @@
         padding: 0.75rem 1rem;
         transition: all 0.2s ease;
         font-size: 0.95rem;
+        width: 100%;
     }
 
-    .admin-form .form-control::placeholder,
-    .admin-form .form-select {
+    .admin-form .form-control::placeholder {
         color: #94a3b8;
     }
 
-    .admin-form .form-control:focus,
-    .admin-form .form-select:focus {
+    .admin-form .form-control:focus {
         background: rgba(30, 41, 59, 0.7);
         border-color: #6366f1;
         color: #e2e8f0;
@@ -30,25 +28,23 @@
     .admin-form label {
         color: #e2e8f0;
         font-weight: 500;
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.5rem;
         display: block;
-    }
-
-    .admin-form .form-text {
-        color: #94a3b8;
-        font-size: 0.875rem;
     }
 
     .admin-form .invalid-feedback {
         color: #ef4444;
         font-size: 0.875rem;
-        display: block;
         margin-top: 0.25rem;
+    }
+
+    .is-invalid {
+        border-color: #ef4444 !important;
     }
 
     .form-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-template-columns: 1fr;
         gap: 1.5rem;
         margin-bottom: 2rem;
     }
@@ -56,7 +52,7 @@
     .form-btn-group {
         display: flex;
         gap: 1rem;
-        margin-top: 2.5rem;
+        margin-top: 2rem;
         padding-top: 2rem;
         border-top: 1px solid rgba(148, 163, 184, 0.1);
         flex-wrap: wrap;
@@ -95,37 +91,32 @@
         background: rgba(148, 163, 184, 0.15);
         color: #e2e8f0;
     }
-
-    @media (max-width: 768px) {
-        .form-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .form-btn-group {
-            flex-direction: column;
-        }
-
-        .btn {
-            width: 100%;
-            justify-content: center;
-        }
-    }
 </style>
 
 {{ form_start(form, {'attr': {'class': 'admin-form', 'novalidate': 'novalidate'}}) }}
-    <div class="form-grid">
-        <div class="form-group">
-            {{ form_row(form.name, {'attr': {'class': 'form-control'}, 'label': 'Category Name'}) }}
+
+<div class="form-grid">
+    <div class="form-group">
+        {{ form_label(form.name, 'Category Name') }}
+        {{ form_widget(form.name, {
+            'attr': {
+                'class': 'form-control ' ~ (form.name.vars.errors|length > 0 ? 'is-invalid' : '')
+            }
+        }) }}
+        <div class="invalid-feedback">
+            {{ form_errors(form.name) }}
         </div>
     </div>
+</div>
 
-    <div class="form-btn-group">
-        <button type="submit" class="btn btn-primary">
-            <i class="fas fa-save"></i> {{ button_label|default('Save Category') }}
-        </button>
-        <a href="{{ path('admin_category_index') }}" class="btn btn-secondary">
-            <i class="fas fa-times"></i> Cancel
-        </a>
-    </div>
+<div class="form-btn-group">
+    <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save"></i> {{ button_label|default('Save Category') }}
+    </button>
+
+    <a href="{{ path('admin_category_index') }}" class="btn btn-secondary">
+        <i class="fas fa-times"></i> Cancel
+    </a>
+</div>
 
 {{ form_end(form) }}

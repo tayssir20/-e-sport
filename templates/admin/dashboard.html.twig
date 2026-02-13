@@ -71,6 +71,8 @@
             backdrop-filter: blur(10px);
             z-index: 1000;
             padding: 2rem 0;
+            overflow-y: auto;   
+            overflow-x: hidden;
         }
         
         .sidebar-header {
@@ -484,6 +486,12 @@
                         <a class="nav-link {{ 'admin_jeu' in app.request.get('_route') ? 'active' : '' }}" href="{{ path('admin_jeu_index') }}">
                             <i class="fas fa-gamepad"></i>
                             <span>Games</span>
+                        </a>
+                    </li>
+                   <li class="nav-item">
+                        <a class="nav-link" href="{{ path('admin_payement') }}">
+                            <i class="fas fa-trophy"></i>
+                            <span>Orders</span>
                         </a>
                     </li>
                      <li class="nav-item">

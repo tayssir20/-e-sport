@@ -6,6 +6,8 @@ use App\Repository\ProductRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Category;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
@@ -15,23 +17,35 @@ class Product
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank(message: "Le nom est obligatoire")]
+    #[Assert\Length(min: 3, minMessage: "Le nom doit contenir au moins {{ limit }} caractères")]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
+    #[Assert\NotBlank(message: "La description est obligatoire")]
+    #[Assert\Length(min: 5, minMessage: "La description doit contenir au moins {{ limit }} caractères")]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
 
+    #[Assert\NotBlank(message: "Le prix est obligatoire")]
+    #[Assert\Positive(message: "Le prix doit être un nombre positif")]
     #[ORM\Column]
     private ?float $price = null;
 
+    #[Assert\NotBlank(message: "Le stock est obligatoire")]
+    #[Assert\Positive(message: "Le stock doit être un nombre positif")]
     #[ORM\Column]
     private ?int $stock = null;
 
+    #[Assert\NotBlank(message: "L'image est obligatoire")]
+    #[Assert\Url(message: "Veuillez entrer une URL valide")]
     #[ORM\Column(length: 255)]
     private ?string $image = null;
 
     #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'products')]
     #[ORM\JoinColumn(nullable: false)]
+    
+    #[Assert\NotNull(message: "Veuillez choisir une catégorie")]
     private ?Category $category = null;
     
     public function getId(): ?int

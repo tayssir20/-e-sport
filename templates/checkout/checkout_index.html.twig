@@ -1,0 +1,205 @@
+{% extends 'base.html.twig' %}
+{% block title %}Checkout - e-sports.tn{% endblock %}
+
+{% block body %}
+<style>
+.checkout-section { background: #fff; padding: 70px 0; font-family: 'Open Sans', sans-serif; }
+.form-label { font-weight: 600; font-size: 0.85rem; color: #555; margin-bottom: 6px; }
+.gaming-input { background: #fff; border: 1px solid #e6e6e6; border-radius: 8px; padding: 11px 14px; font-size: 0.9rem; color: #333; transition: 0.25s; width: 100%; }
+.gaming-input:focus { border-color: #054397; box-shadow: 0 0 0 3px rgba(5,67,151,0.08); outline: none; }
+.gaming-input.is-error { border-color: #dc3545; }
+.error-msg { color: #dc3545; font-size: 0.75rem; margin-top: 4px; display: none; }
+.summary-card { background: #fff; border-radius: 16px; padding: 28px; border: 1px solid #ededed; box-shadow: 0 8px 25px rgba(0,0,0,0.04); }
+.summary-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.9rem; }
+.summary-divider { border-top: 1px solid #ddd; padding-top: 18px; margin-top: 18px; }
+.pay-method { border: 1px solid #e6e6e6; border-radius: 10px; padding: 13px 15px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; background: #fff; transition: 0.2s; }
+.pay-method.active { border-color: #054397; background: #f0f7ff; }
+.pay-method input { margin-right: 10px; accent-color: #054397; }
+.btn-order { background: #000; color: #fff; width: 100%; padding: 14px; border-radius: 10px; font-weight: 700; text-transform: uppercase; border: none; letter-spacing: 0.8px; font-size: 0.9rem; margin-top: 18px; cursor: pointer; transition: 0.25s; }
+.btn-order:hover { background: #054397; }
+.btn-order:disabled { background: #999; cursor: not-allowed; }
+</style>
+
+<section class="checkout-section">
+    <div class="container">
+        <div class="mb-5 text-center">
+            <h2 class="fw-bold">Checkout</h2>
+            <p class="text-muted">Complete your order to gear up.</p>
+        </div>
+
+        <div class="row g-5">
+            {# ---- Billing Form ---- #}
+            <div class="col-lg-7">
+                <h4 class="mb-4 fw-bold">Billing Details</h4>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">First Name *</label>
+                        <input id="firstName" class="gaming-input" type="text" placeholder="John">
+                        <div class="error-msg" id="err-firstName">Required</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Last Name *</label>
+                        <input id="lastName" class="gaming-input" type="text" placeholder="Doe">
+                        <div class="error-msg" id="err-lastName">Required</div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Email *</label>
+                        <input id="email" class="gaming-input" type="email" placeholder="john@example.com" value="{{ app.user.email }}">
+                        <div class="error-msg" id="err-email">Valid email required</div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Street Address *</label>
+                        <input id="address" class="gaming-input" type="text" placeholder="123 Gaming St.">
+                        <div class="error-msg" id="err-address">Required</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">City *</label>
+                        <input id="city" class="gaming-input" type="text">
+                        <div class="error-msg" id="err-city">Required</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Postal Code *</label>
+                        <input id="postalCode" class="gaming-input" type="text">
+                        <div class="error-msg" id="err-postalCode">Required</div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Phone *</label>
+                        <input id="phone" class="gaming-input" type="tel" placeholder="+216 ** *** ***">
+                        <div class="error-msg" id="err-phone">Required</div>
+                    </div>
+                </div>
+            </div>
+
+            {# ---- Order Summary ---- #}
+            <div class="col-lg-5">
+                <div class="summary-card">
+                    <h4 class="mb-4 fw-bold">Your Order</h4>
+
+                    {% for item in cartItems %}
+                        <div class="summary-row">
+                            <span>{{ item.product.name }} <strong>x{{ item.quantity }}</strong></span>
+                            <span class="fw-bold">{{ item.subtotal|number_format(2) }} TND</span>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No items.</p>
+                    {% endfor %}
+
+                    <div class="summary-divider">
+                        <div class="summary-row">
+                            <span class="text-muted">Subtotal</span>
+                            <span class="fw-bold">{{ total|number_format(2) }} TND</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="text-muted">Shipping</span>
+                            <span class="fw-bold text-success">Free</span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-3">
+                            <span class="h5 fw-bold mb-0">Total</span>
+                            <span class="h4 fw-bold mb-0" style="color:#054397;">{{ total|number_format(2) }} TND</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <label class="form-label mb-2">Payment Method</label>
+                        <div class="pay-method active" onclick="selectPay(this)">
+                            <input type="radio" name="pay" checked>
+                            <span class="fw-bold ms-2">Credit Card</span>
+                            <i class="far fa-credit-card ms-auto text-muted"></i>
+                        </div>
+                    </div>
+
+                    <button class="btn-order" id="btn-order">
+                        <span id="btn-text">Place Order</span>
+                    </button>
+
+                    <p class="text-muted small text-center mt-3">
+                        <i class="fas fa-lock me-1"></i> Secured by Stripe
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# Stripe JS #}
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+const stripe = Stripe('{{ stripePublicKey }}');
+
+function selectPay(el) {
+    document.querySelectorAll('.pay-method').forEach(e => e.classList.remove('active'));
+    document.querySelectorAll('.pay-method input').forEach(i => i.checked = false);
+    el.classList.add('active');
+    el.querySelector('input').checked = true;
+}
+
+function validate() {
+    let ok = true;
+    const fields = ['firstName','lastName','email','address','city','postalCode','phone'];
+    fields.forEach(id => {
+        const f = document.getElementById(id);
+        const e = document.getElementById('err-' + id);
+        if (!f.value.trim()) {
+            f.classList.add('is-error'); e.style.display = 'block'; ok = false;
+        } else {
+            f.classList.remove('is-error'); e.style.display = 'none';
+        }
+    });
+    const em = document.getElementById('email');
+    if (em.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em.value)) {
+        em.classList.add('is-error');
+        document.getElementById('err-email').textContent = 'Invalid email';
+        document.getElementById('err-email').style.display = 'block';
+        ok = false;
+    }
+    return ok;
+}
+
+document.getElementById('btn-order').addEventListener('click', async () => {
+    if (!validate()) return;
+
+    const btn = document.getElementById('btn-order');
+    const txt = document.getElementById('btn-text');
+    btn.disabled = true;
+    txt.textContent = 'Processing...';
+
+    const payload = {
+        firstName:  document.getElementById('firstName').value,
+        lastName:   document.getElementById('lastName').value,
+        email:      document.getElementById('email').value,
+        address:    document.getElementById('address').value,
+        city:       document.getElementById('city').value,
+        postalCode: document.getElementById('postalCode').value,
+        phone:      document.getElementById('phone').value,
+    };
+
+    try {
+        const res  = await fetch('/payment/create-checkout-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (data.success && data.sessionId) {
+            await stripe.redirectToCheckout({ sessionId: data.sessionId });
+        } else {
+            alert(data.message || 'Error. Please try again.');
+            btn.disabled = false; txt.textContent = 'Place Order';
+        }
+    } catch (err) {
+        alert('Connection error. Please try again.');
+        btn.disabled = false; txt.textContent = 'Place Order';
+    }
+});
+
+// Clear errors on input
+document.querySelectorAll('.gaming-input').forEach(f => {
+    f.addEventListener('input', () => {
+        f.classList.remove('is-error');
+        const e = document.getElementById('err-' + f.id);
+        if (e) e.style.display = 'none';
+    });
+});
+</script>
+{% endblock %}

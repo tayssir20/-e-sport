@@ -233,21 +233,5 @@ class CartController extends AbstractController
             'total' => $cart->getTotal()
         ]);
     }
-     #[Route('/checkout', name: 'app_checkout')]
-    public function checkout(CartItemRepository $cartItemRepository): Response
-    {
-        // Fetch all cart items (no user restriction)
-        $cartItems = $cartItemRepository->findAll();
-
-        // Calculate total
-        $total = 0;
-        foreach ($cartItems as $item) {
-            $total += $item->getSubtotal();
-        }
-
-        return $this->render('cart/checkout.html.twig', [
-            'cartItems' => $cartItems,
-            'total' => $total,
-        ]);
-    }
+    
 }

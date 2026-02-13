@@ -183,6 +183,7 @@
                 <thead>
                     <tr>
                         <th>Name</th>
+                        <th>Description</th>
                         <th>category</th>
                         <th>price</th>
                         <th class="text-end">Actions</th>
@@ -192,6 +193,7 @@
                     {% for product in products %}
                         <tr>
                             <td>{{ product.name }}</td>
+                            <td>{{ product.description }}</td>
                             <td>{{ product.category ? product.category.name : '' }}</td>
                             <td>{{ product.price ? product.price|number_format(2, '.', ',') ~ ' €' : '' }}</td>
                             <td class="text-end">
