@@ -2,11 +2,12 @@
 
 namespace App\Security;
 
+use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
@@ -14,6 +15,7 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
 class LoginFormAthenticateurAuthenticator extends AbstractLoginFormAuthenticator
@@ -22,51 +24,43 @@ class LoginFormAthenticateurAuthenticator extends AbstractLoginFormAuthenticator
 
     public const LOGIN_ROUTE = 'app_login';
 
-    public function __construct(private UrlGeneratorInterface $urlGenerator)
-    {
-    }
+    public function __construct(private UrlGeneratorInterface $urlGenerator, private EntityManagerInterface $entityManager) {}
 
     public function authenticate(Request $request): Passport
     {
-        $email = $request->getPayload()->getString('email');
+        $email = $request->request->get('email', '');
 
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $email);
 
         return new Passport(
-            new UserBadge($email),
-            new PasswordCredentials($request->getPayload()->getString('password')),
+            new UserBadge($email, function($userIdentifier) {
+                $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $userIdentifier]);
+                if (!$user || !$user->isActive()) {
+                    throw new CustomUserMessageAuthenticationException('Your account is blocked.');
+                }
+                return $user;
+            }),
+            new PasswordCredentials($request->request->get('password', '')),
             [
-                new CsrfTokenBadge('authenticate', $request->getPayload()->getString('_csrf_token')),
+                new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')),
                 new RememberMeBadge(),
             ]
         );
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?RedirectResponse
     {
         if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
             return new RedirectResponse($targetPath);
         }
-        // If the authenticated user is an admin, redirect to admin dashboard
+
         $user = $token->getUser();
 
-        if (is_object($user)) {
-            // Prefer role check when available
-            if (method_exists($user, 'getRoles') && in_array('ROLE_ADMIN', $user->getRoles(), true)) {
-                return new RedirectResponse($this->urlGenerator->generate('admin_dashboard'));
-            }
-
-            // Fallback: check email (keeps your previous logic)
-            if (method_exists($user, 'getEmail') && $user->getEmail() === 'admin@gmail.com') {
-                return new RedirectResponse($this->urlGenerator->generate('admin_dashboard'));
-            }
+        if (is_object($user) && method_exists($user, 'getRoles') && in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+            return new RedirectResponse($this->urlGenerator->generate('admin_dashboard'));
         }
 
-        // Default redirect to homepage
         return new RedirectResponse($this->urlGenerator->generate('app_home'));
-        // return new RedirectResponse($this->urlGenerator->generate('app_profile'));
-
-
     }
 
     protected function getLoginUrl(Request $request): string

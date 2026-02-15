@@ -44,7 +44,7 @@ class ProfileController extends AbstractController
             $em->persist($user);
             $em->flush();
 
-            $this->addFlash('success', 'Profil mis à jour avec succès !');
+            // $this->addFlash('success', 'Profil mis à jour avec succès !');
 
             return $this->redirectToRoute('app_profile');
         }

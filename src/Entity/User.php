@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Entity;
 
 use App\Repository\UserRepository;
@@ -34,12 +33,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 3)]
-
-
-
     private ?string $nom = null;
 
-
+    #[ORM\Column(type: 'boolean')]
+    private bool $isActive = true;
 
     public function __construct()
     {
@@ -67,7 +64,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return (string) $this->email;
     }
 
-    
     public function getRoles(): array
     {
         return array_unique(array_merge($this->roles, ['ROLE_USER']));
@@ -100,6 +96,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setNom(string $nom): static
     {
         $this->nom = trim($nom);
+        return $this;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): static
+    {
+        $this->isActive = $isActive;
         return $this;
     }
 }

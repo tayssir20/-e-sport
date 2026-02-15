@@ -145,6 +145,27 @@ class UserController extends AbstractController
         return $this->redirectToRoute('admin_user_index', [], Response::HTTP_SEE_OTHER);
     }
 
+
+
+    // block and unblock users 
+    #[Route('/{id}/block', name: 'admin_user_block')]
+    public function block(User $user, EntityManagerInterface $em): Response
+    {
+        $user->setIsActive(false);
+        $em->flush();
+
+        return $this->redirectToRoute('admin_user_index');
+    }
+
+    #[Route('/{id}/unblock', name: 'admin_user_unblock')]
+    public function unblock(User $user, EntityManagerInterface $em): Response
+    {
+        $user->setIsActive(true);
+        $em->flush();
+
+        return $this->redirectToRoute('admin_user_index');
+    }
+
     /**
      * Toggle user status (AJAX)
      */
