@@ -1,5 +1,5 @@
 {# templates/equipe/_form.html.twig #}
-{{ form_start(form, {'attr': {'class': 'needs-validation'}, 'multipart': true}) }}
+{{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}, 'multipart': true}) }}
 {% if return_to_tournoi is defined and return_to_tournoi %}
     <input type="hidden" name="return_to_tournoi" value="{{ return_to_tournoi }}">
 {% endif %}

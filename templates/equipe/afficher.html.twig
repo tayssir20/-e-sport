@@ -387,7 +387,7 @@ function closeModal(id){
 
         {% for equipe in equipes %}
             {% set is_member = user_team_ids is defined and equipe.id in user_team_ids %}
-            {% include 'equipe/card.html.twig' with { equipe: equipe, is_member: is_member|default(false) } %}
+            {% include 'equipe/card.html.twig' with { equipe: equipe, is_member: is_member|default(false), rankingByTeamId: rankingByTeamId|default({}) } %}
         {% else %}
             <div class="empty-state">
                 <div class="empty-icon"><i class="fas fa-ghost"></i></div>
@@ -464,11 +464,18 @@ function closeModal(id){
 
             <div class="modal-actions">
 
+                {% if pendingTeamIds is defined and equipe.id in pendingTeamIds %}
+                <span class="btn" style="flex:1;background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);cursor:default;padding:13px;border-radius:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fas fa-clock"></i>
+                    ⏳ En attente
+                </span>
+                {% else %}
                 <a href="{{ path('app_equipe_join', {id: equipe.id}) }}"
                    class="btn btn-join">
                     <i class="fas fa-users"></i>
                     Join Team
                 </a>
+                {% endif %}
 
                 <button class="btn btn-close"
                         onclick="closeModal('modal-{{ equipe.id }}')">

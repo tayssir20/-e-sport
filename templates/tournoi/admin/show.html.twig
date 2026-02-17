@@ -1,0 +1,129 @@
+{% extends 'admin/dashboard.html.twig' %}
+
+{% block title %}{{ tournoi.nom }} - Admin{% endblock %}
+
+{% block admin_content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="page-title">{{ tournoi.nom }}</h1>
+            <p class="page-subtitle">
+                {{ tournoi.jeu ? tournoi.jeu.nom : '—' }} • 
+                <span class="badge {% if tournoi.statut == 'En Attente' %}bg-warning text-dark{% elseif tournoi.statut == 'En cours' %}bg-info{% else %}bg-secondary{% endif %}">{{ tournoi.statut }}</span>
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ path('app_tournoi_show', {'id': tournoi.id}) }}" class="btn btn-outline" target="_blank">
+                <i class="fas fa-external-link-alt me-2"></i>Voir sur le site
+            </a>
+            <a href="{{ path('admin_tournoi_edit', {'id': tournoi.id}) }}" class="btn btn-primary">
+                <i class="fas fa-edit me-2"></i>Modifier
+            </a>
+            <a href="{{ path('admin_tournoi_index') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left me-2"></i>Retour
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informations</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-borderless">
+                        <tr>
+                            <td class="text-muted" style="width: 40%;">Nom</td>
+                            <td class="fw-semibold">{{ tournoi.nom }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Jeu</td>
+                            <td>{{ tournoi.jeu ? tournoi.jeu.nom : '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Type</td>
+                            <td>{{ tournoi.type }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Statut</td>
+                            <td><span class="badge {% if tournoi.statut == 'En Attente' %}bg-warning text-dark{% elseif tournoi.statut == 'En cours' %}bg-info{% else %}bg-secondary{% endif %}">{{ tournoi.statut }}</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Date début</td>
+                            <td>{{ tournoi.dateDebut ? tournoi.dateDebut|date('d/m/Y H:i') : '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Date fin</td>
+                            <td>{{ tournoi.dateFin ? tournoi.dateFin|date('d/m/Y H:i') : '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Date limite inscription</td>
+                            <td>{{ tournoi.dateInscriptionLimite ? tournoi.dateInscriptionLimite|date('d/m/Y H:i') : '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Participants max</td>
+                            <td>{{ tournoi.maxParticipants ?? '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Cagnotte</td>
+                            <td>{{ tournoi.cagnotte ? tournoi.cagnotte ~ '€' : '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Frais d'inscription</td>
+                            <td>{{ tournoi.fraisInscription is not null ? tournoi.fraisInscription ~ '€' : 'Gratuit' }}</td>
+                        </tr>
+                        {% if tournoi.description %}
+                        <tr>
+                            <td class="text-muted">Description</td>
+                            <td>{{ tournoi.description|nl2br }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-users me-2"></i>Équipes inscrites ({{ equipesInscrites|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if equipesInscrites|length > 0 %}
+                <ul class="list-group list-group-flush">
+                    {% for equipe in equipesInscrites %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background: transparent; border-color: rgba(148, 163, 184, 0.1);">
+                        <a href="{{ path('admin_equipe_show', {'id': equipe.id}) }}" class="text-decoration-none text-white">{{ equipe.nom }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted mb-0">Aucune équipe inscrite.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex gap-2">
+            <a href="{{ path('admin_tournoi_edit', {'id': tournoi.id}) }}" class="btn btn-primary">
+                <i class="fas fa-edit me-2"></i>Modifier
+            </a>
+            <form method="POST" action="{{ path('admin_tournoi_delete', {'id': tournoi.id}) }}" class="d-inline" onsubmit="return confirm('Supprimer ce tournoi ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ tournoi.id) }}">
+                <button type="submit" class="btn btn-outline" style="border-color: var(--danger); color: var(--danger);">
+                    <i class="fas fa-trash me-2"></i>Supprimer
+                </button>
+            </form>
+            <a href="{{ path('admin_tournoi_index') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

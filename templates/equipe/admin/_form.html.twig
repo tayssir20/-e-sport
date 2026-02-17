@@ -37,7 +37,7 @@
     }
 </style>
 
-{{ form_start(form, {'attr': {'class': 'admin-form', 'enctype': 'multipart/form-data'}}) }}
+{{ form_start(form, {'attr': {'class': 'admin-form', 'enctype': 'multipart/form-data', 'novalidate': 'novalidate'}}) }}
     <div class="form-grid">
         <div class="form-group">
             {{ form_label(form.nom) }}
@@ -46,9 +46,14 @@
         </div>
 
         <div class="form-group">
-            {{ form_label(form.owner) }}
-            {{ form_widget(form.owner, {'attr': {'class': 'form-select'}}) }}
-            {{ form_errors(form.owner) }}
+            {% if form.owner is defined %}
+                {{ form_label(form.owner) }}
+                {{ form_widget(form.owner, {'attr': {'class': 'form-select'}}) }}
+                {{ form_errors(form.owner) }}
+            {% else %}
+                <label>Owner</label>
+                <div class="form-control" style="background:transparent;border:none;padding:0;">{{ equipe.owner ? equipe.owner.getNom() ?: equipe.owner.userIdentifier : '—' }}</div>
+            {% endif %}
         </div>
 
         <div class="form-group">

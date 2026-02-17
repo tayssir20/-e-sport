@@ -179,7 +179,7 @@
     </a>
 
     <!-- Join Team -->
-    <a href="{{ path('app_equipe_not_member') }}" class="action-card">
+    <a href="{{ path('app_equipe_discover') }}" class="action-card">
         <div class="card-icon-wrapper icon-join">
             <i class="fas fa-users"></i>
         </div>
@@ -187,6 +187,199 @@
         <p class="card-desc">Browse existing teams, find your community, and start competing.</p>
         <div class="card-arrow"><i class="fas fa-arrow-right"></i></div>
     </a>
+</div>
+
+<!-- GLOBAL RANKING LEADERBOARD -->
+<style>
+    .ranking-section {
+        max-width: 1200px;
+        margin: 0 auto 80px;
+        padding: 0 20px;
+    }
+    .ranking-title {
+        font-size: 2rem;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 10px;
+        background: linear-gradient(90deg, #f59e0b, #ec4899, #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .ranking-subtitle {
+        text-align: center;
+        color: #94a3b8;
+        margin-bottom: 30px;
+        font-size: 1rem;
+    }
+    .ranking-table-wrap {
+        background: rgba(30, 41, 59, 0.6);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 20px;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+    .ranking-table {
+        width: 100%;
+        border-collapse: collapse;
+        color: #e2e8f0;
+    }
+    .ranking-table thead th {
+        background: rgba(15, 23, 42, 0.8);
+        padding: 14px 12px;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #94a3b8;
+        font-weight: 700;
+        text-align: center;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .ranking-table thead th:first-child,
+    .ranking-table thead th:nth-child(2) {
+        text-align: left;
+    }
+    .ranking-table tbody tr {
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+        transition: background 0.2s;
+    }
+    .ranking-table tbody tr:hover {
+        background: rgba(139, 92, 246, 0.06);
+    }
+    .ranking-table td {
+        padding: 14px 12px;
+        text-align: center;
+        font-size: 0.95rem;
+    }
+    .ranking-table td:first-child,
+    .ranking-table td:nth-child(2) {
+        text-align: left;
+    }
+    .rank-pos {
+        font-weight: 900;
+        font-size: 1.1rem;
+        width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+    }
+    .rank-1 { background: linear-gradient(135deg, rgba(245,158,11,0.25), rgba(245,158,11,0.1)); color: #f59e0b; }
+    .rank-2 { background: linear-gradient(135deg, rgba(148,163,184,0.25), rgba(148,163,184,0.1)); color: #cbd5e1; }
+    .rank-3 { background: linear-gradient(135deg, rgba(180,83,9,0.25), rgba(180,83,9,0.1)); color: #d97706; }
+    .rank-default { background: rgba(255,255,255,0.04); color: #64748b; }
+    .team-name-cell {
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .team-name-cell a {
+        color: #f1f5f9;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .team-name-cell a:hover {
+        color: #ec4899;
+    }
+    .badge-pill {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .badge-elite {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-competitive {
+        background: rgba(245, 158, 11, 0.15);
+        color: #f59e0b;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .badge-beginner {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .ppm-value {
+        font-weight: 800;
+        font-size: 1.05rem;
+        background: linear-gradient(90deg, #ec4899, #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .positive-diff { color: #10b981; }
+    .negative-diff { color: #ef4444; }
+    .neutral-diff  { color: #64748b; }
+
+    @media (max-width: 768px) {
+        .ranking-table { font-size: 0.8rem; }
+        .ranking-table td, .ranking-table thead th { padding: 10px 6px; }
+        .rank-pos { width: 30px; height: 30px; font-size: 0.9rem; }
+    }
+</style>
+
+<div class="ranking-section">
+    <h2 class="ranking-title">🏆 Global Ranking</h2>
+    <p class="ranking-subtitle">Teams ranked by Points per Match — fair ranking regardless of matches played</p>
+
+    <div class="ranking-table-wrap">
+        <table class="ranking-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Team</th>
+
+                    <th>MJ</th>
+                    <th>V</th>
+                    <th>N</th>
+                    <th>D</th>
+                    <th>GF</th>
+                    <th>GA</th>
+                    <th>+/-</th>
+                    <th>Pts</th>
+                    <th>Pts/M</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in ranking %}
+                <tr>
+                    <td>
+                        <span class="rank-pos {% if r.rang == 1 %}rank-1{% elseif r.rang == 2 %}rank-2{% elseif r.rang == 3 %}rank-3{% else %}rank-default{% endif %}">
+                            {{ r.rang }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="team-name-cell">
+                            <a href="{{ path('app_equipe_dashboard', {id: r.equipe.id}) }}">{{ r.equipe.nom }}</a>
+                        </div>
+                    </td>
+
+                    <td>{{ r.mj }}</td>
+                    <td>{{ r.v }}</td>
+                    <td>{{ r.n }}</td>
+                    <td>{{ r.p }}</td>
+                    <td>{{ r.bp }}</td>
+                    <td>{{ r.bc }}</td>
+                    <td class="{% if r.diff > 0 %}positive-diff{% elseif r.diff < 0 %}negative-diff{% else %}neutral-diff{% endif %}">
+                        {% if r.diff > 0 %}+{% endif %}{{ r.diff }}
+                    </td>
+                    <td><strong>{{ r.pts }}</strong></td>
+                    <td><span class="ppm-value">{{ r.ppm }}</span></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="11" style="text-align:center;padding:40px;color:#64748b;">No teams yet</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script>

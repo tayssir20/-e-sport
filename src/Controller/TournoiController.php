@@ -219,11 +219,54 @@ final class TournoiController extends AbstractController
             ]);
         }
 
-        // Afficher le formulaire : choisir une équipe existante ou créer une équipe
+        $equipesRejoignables = $tournoiRepository->getEquipesRejoignables($tournoi, $user);
+
         return $this->render('tournoi/register.html.twig', [
             'tournoi' => $tournoi,
             'equipes' => $equipes,
+            'equipesRejoignables' => $equipesRejoignables,
         ]);
+    }
+
+    #[Route('/{id}/rejoindre-equipe', name: 'app_tournoi_rejoindre_equipe', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function rejoindreEquipe(int $id, Request $request, TournoiRepository $tournoiRepository, EquipeRepository $equipeRepository, EntityManagerInterface $entityManager): Response
+    {
+        $tournoi = $tournoiRepository->find($id);
+        if (!$tournoi) {
+            throw $this->createNotFoundException('Tournoi introuvable.');
+        }
+        if (!$this->isCsrfTokenValid('rejoindre_equipe_tournoi', $request->request->get('token'))) {
+            $this->addFlash('error', 'Token de sécurité invalide.');
+            return $this->redirectToRoute('app_tournoi_register', ['id' => $id]);
+        }
+        $equipeId = $request->request->getInt('equipe_id', 0);
+        $equipe = $equipeRepository->find($equipeId);
+        $user = $this->getUser();
+        if (!$equipe) {
+            $this->addFlash('error', 'Équipe introuvable.');
+            return $this->redirectToRoute('app_tournoi_register', ['id' => $id]);
+        }
+        if ($equipe->getOwner() === $user || $equipe->getMembers()->contains($user)) {
+            $this->addFlash('info', 'Vous faites déjà partie de cette équipe.');
+            return $this->redirectToRoute('app_tournoi_show', ['id' => $id]);
+        }
+        if (!$tournoi->getEquipes()->contains($equipe)) {
+            $this->addFlash('error', 'Cette équipe n\'est pas inscrite à ce tournoi.');
+            return $this->redirectToRoute('app_tournoi_register', ['id' => $id]);
+        }
+        if ($equipe->getMembers()->count() >= $equipe->getMaxMembers()) {
+            $this->addFlash('error', 'Cette équipe est complète.');
+            return $this->redirectToRoute('app_tournoi_register', ['id' => $id]);
+        }
+        try {
+            $equipe->addMember($user);
+            $entityManager->flush();
+            $this->addFlash('success', 'Vous avez rejoint l\'équipe ' . $equipe->getNom() . ' ! Vous participez maintenant au tournoi.');
+        } catch (\DomainException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+        return $this->redirectToRoute('app_tournoi_show', ['id' => $id]);
     }
 
     #[Route('/{id}/edit', name: 'app_tournoi_edit', methods: ['GET', 'POST'])]

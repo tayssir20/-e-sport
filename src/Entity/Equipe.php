@@ -36,7 +36,6 @@ class Equipe
     #[Assert\NotNull(message: "Une équipe doit avoir un propriétaire.")]
     private ?User $owner = null;
     #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\Url(message: "Le logo doit être une URL valide.")]
     private ?string $logo = null;
 
     public function __construct()

@@ -316,6 +316,289 @@
         </section>
         <!-- use sasu part end-->
 
+        <!-- GLOBAL RANKING -->
+        <style>
+            .gr-section {
+                padding: 80px 0 100px;
+                position: relative;
+                overflow: hidden;
+            }
+            .gr-section::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -20%;
+                width: 600px;
+                height: 600px;
+                background: radial-gradient(circle, rgba(220,38,38,0.08) 0%, transparent 70%);
+                animation: grFloat 8s ease-in-out infinite;
+            }
+            .gr-section::after {
+                content: '';
+                position: absolute;
+                bottom: -40%;
+                right: -10%;
+                width: 500px;
+                height: 500px;
+                background: radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%);
+                animation: grFloat 10s ease-in-out infinite reverse;
+            }
+            @keyframes grFloat {
+                0%, 100% { transform: translate(0, 0); }
+                50% { transform: translate(30px, -20px); }
+            }
+            .gr-header {
+                text-align: center;
+                margin-bottom: 50px;
+                position: relative;
+                z-index: 2;
+            }
+            .gr-live {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                background: rgba(220,38,38,0.12);
+                border: 1px solid rgba(220,38,38,0.3);
+                color: #ef4444;
+                padding: 6px 18px;
+                border-radius: 999px;
+                font-size: 0.7rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                margin-bottom: 20px;
+            }
+            .gr-live-dot {
+                width: 8px;
+                height: 8px;
+                background: #ef4444;
+                border-radius: 50%;
+                animation: grPulse 1.5s ease-in-out infinite;
+            }
+            @keyframes grPulse {
+                0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+                50% { opacity: 0.6; box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+            }
+            .gr-title {
+                font-size: 2.8rem;
+                font-weight: 900;
+                color: #fff;
+                text-transform: uppercase;
+                letter-spacing: 3px;
+                margin: 0;
+                text-shadow: 0 0 40px rgba(220,38,38,0.3);
+            }
+            .gr-title span {
+                background: linear-gradient(90deg, #ef4444, #f59e0b, #ef4444);
+                background-size: 200% auto;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                animation: grShine 3s linear infinite;
+            }
+            @keyframes grShine {
+                0% { background-position: 0% center; }
+                100% { background-position: 200% center; }
+            }
+            .gr-subtitle {
+                color: #64748b;
+                font-size: 0.95rem;
+                margin-top: 10px;
+                letter-spacing: 1px;
+            }
+            .gr-card {
+                position: relative;
+                z-index: 2;
+                background: linear-gradient(145deg, rgba(15,23,42,0.85), rgba(30,41,59,0.65));
+                border: 1px solid rgba(255,255,255,0.04);
+                border-radius: 24px;
+                overflow: hidden;
+                backdrop-filter: blur(20px);
+                box-shadow: 0 25px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+            }
+            .gr-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: linear-gradient(90deg, transparent, #ef4444, #f59e0b, #ef4444, transparent);
+                animation: grBorderGlow 4s linear infinite;
+                background-size: 200% auto;
+            }
+            @keyframes grBorderGlow {
+                0% { background-position: 0% center; }
+                100% { background-position: 200% center; }
+            }
+            .gr-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .gr-table thead th {
+                padding: 18px 16px;
+                font-size: 0.65rem;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                color: #475569;
+                font-weight: 800;
+                text-align: center;
+                background: rgba(0,0,0,0.3);
+                border-bottom: 1px solid rgba(255,255,255,0.03);
+            }
+            .gr-table thead th:nth-child(2) { text-align: left; }
+            .gr-table tbody tr {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                border-bottom: 1px solid rgba(255,255,255,0.02);
+            }
+            .gr-table tbody tr:hover {
+                background: rgba(220,38,38,0.04);
+                transform: scale(1.005);
+            }
+            .gr-table tbody tr:last-child { border-bottom: none; }
+            .gr-table td {
+                padding: 16px;
+                text-align: center;
+                color: #94a3b8;
+                font-size: 0.9rem;
+                font-weight: 500;
+            }
+            .gr-table td:nth-child(2) { text-align: left; }
+
+            /* rank positions */
+            .gr-rank {
+                width: 42px;
+                height: 42px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 12px;
+                font-weight: 900;
+                font-size: 1rem;
+                position: relative;
+            }
+            .gr-rank-1 {
+                background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.05));
+                color: #f59e0b;
+                box-shadow: 0 0 20px rgba(245,158,11,0.15);
+                border: 1px solid rgba(245,158,11,0.2);
+            }
+            .gr-rank-2 {
+                background: linear-gradient(135deg, rgba(192,192,210,0.15), rgba(192,192,210,0.05));
+                color: #c0c0d2;
+                border: 1px solid rgba(192,192,210,0.15);
+            }
+            .gr-rank-3 {
+                background: linear-gradient(135deg, rgba(205,127,50,0.15), rgba(205,127,50,0.05));
+                color: #cd7f32;
+                border: 1px solid rgba(205,127,50,0.15);
+            }
+            .gr-rank-default {
+                background: rgba(255,255,255,0.02);
+                color: #475569;
+                border: 1px solid rgba(255,255,255,0.03);
+            }
+
+            /* top 3 row glow */
+            .gr-row-1 { background: linear-gradient(90deg, rgba(245,158,11,0.04), transparent 60%); }
+            .gr-row-2 { background: linear-gradient(90deg, rgba(192,192,210,0.03), transparent 60%); }
+            .gr-row-3 { background: linear-gradient(90deg, rgba(205,127,50,0.03), transparent 60%); }
+            .gr-row-1:hover { background: linear-gradient(90deg, rgba(245,158,11,0.08), transparent 60%) !important; }
+            .gr-row-2:hover { background: linear-gradient(90deg, rgba(192,192,210,0.06), transparent 60%) !important; }
+            .gr-row-3:hover { background: linear-gradient(90deg, rgba(205,127,50,0.06), transparent 60%) !important; }
+
+            .gr-team-name {
+                font-weight: 800;
+                color: #e2e8f0;
+                font-size: 0.95rem;
+                letter-spacing: 0.5px;
+            }
+            .gr-row-1 .gr-team-name { color: #fbbf24; }
+
+            .gr-pts {
+                font-weight: 900;
+                color: #e2e8f0;
+                font-size: 1rem;
+            }
+            .gr-ppm {
+                font-weight: 900;
+                font-size: 1.05rem;
+                background: linear-gradient(90deg, #ef4444, #f59e0b);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .gr-diff-pos { color: #22c55e; font-weight: 700; }
+            .gr-diff-neg { color: #ef4444; font-weight: 700; }
+            .gr-diff-zero { color: #334155; }
+
+            .gr-empty {
+                text-align: center;
+                padding: 60px 20px;
+                color: #334155;
+                font-size: 1.1rem;
+                font-weight: 600;
+                letter-spacing: 1px;
+            }
+
+            @media (max-width: 768px) {
+                .gr-title { font-size: 1.8rem; letter-spacing: 1px; }
+                .gr-table td, .gr-table thead th { padding: 10px 8px; font-size: 0.78rem; }
+                .gr-rank { width: 32px; height: 32px; font-size: 0.85rem; border-radius: 8px; }
+                .gr-section { padding: 50px 0 60px; }
+            }
+        </style>
+
+        <section class="gr-section">
+            <div class="container">
+                <div class="gr-header">
+                    <div class="gr-live"><span class="gr-live-dot"></span> Live Rankings</div>
+                    <h2 class="gr-title">GLOBAL <span>RANKING</span></h2>
+                    <p class="gr-subtitle">Teams ranked by performance ratio — Pts / Match</p>
+                </div>
+
+                <div class="gr-card">
+                    <table class="gr-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Team</th>
+                                <th>MP</th>
+                                <th>W</th>
+                                <th>D</th>
+                                <th>L</th>
+                                <th>+/-</th>
+                                <th>Pts</th>
+                                <th>Pts/M</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in ranking %}
+                            <tr class="{% if r.rang == 1 %}gr-row-1{% elseif r.rang == 2 %}gr-row-2{% elseif r.rang == 3 %}gr-row-3{% endif %}">
+                                <td>
+                                    <span class="gr-rank {% if r.rang == 1 %}gr-rank-1{% elseif r.rang == 2 %}gr-rank-2{% elseif r.rang == 3 %}gr-rank-3{% else %}gr-rank-default{% endif %}">
+                                        {% if r.rang == 1 %}👑{% else %}{{ r.rang }}{% endif %}
+                                    </span>
+                                </td>
+                                <td><span class="gr-team-name">{{ r.equipe.nom }}</span></td>
+                                <td>{{ r.mj }}</td>
+                                <td>{{ r.v }}</td>
+                                <td>{{ r.n }}</td>
+                                <td>{{ r.p }}</td>
+                                <td class="{% if r.diff > 0 %}gr-diff-pos{% elseif r.diff < 0 %}gr-diff-neg{% else %}gr-diff-zero{% endif %}">
+                                    {% if r.diff > 0 %}+{% endif %}{{ r.diff }}
+                                </td>
+                                <td><span class="gr-pts">{{ r.pts }}</span></td>
+                                <td><span class="gr-ppm">{{ r.ppm }}</span></td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="9" class="gr-empty">⚔️ No battles yet — rankings update after matches</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <!-- GLOBAL RANKING END -->
+
         <!-- gallery_part part start-->
         <section class="gallery_part section_padding">
             <div class="container">

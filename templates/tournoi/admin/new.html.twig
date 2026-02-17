@@ -1,0 +1,26 @@
+{% extends 'admin/dashboard.html.twig' %}
+
+{% block title %}Nouveau tournoi - Admin{% endblock %}
+
+{% block admin_content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="page-title">Nouveau tournoi</h1>
+            <p class="page-subtitle">Créer un nouveau tournoi e-sport</p>
+        </div>
+        <a href="{{ path('admin_tournoi_index') }}" class="btn btn-outline">
+            <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Informations du tournoi</h5>
+    </div>
+    <div class="card-body">
+        {{ include('tournoi/admin/_form.html.twig', {'button_label': 'Créer le tournoi'}) }}
+    </div>
+</div>
+{% endblock %}

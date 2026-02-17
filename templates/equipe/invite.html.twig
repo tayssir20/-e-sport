@@ -419,6 +419,49 @@
             </div>
         </div>
 
+        {# ── Pending Join Requests ── #}
+        {% if isOwner and pendingRequests is defined and pendingRequests|length > 0 %}
+        <div style="margin-bottom:40px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+                <h2 style="font-size:1.3rem;font-weight:800;display:flex;align-items:center;gap:10px;margin:0;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
+                    </svg>
+                    <span style="background:linear-gradient(135deg,#a855f7,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Demandes en attente</span>
+                </h2>
+                <span style="background:rgba(168,85,247,0.15);color:#a855f7;font-size:0.8rem;font-weight:700;padding:5px 14px;border-radius:999px;border:1px solid rgba(168,85,247,0.25);">{{ pendingRequests|length }} en attente</span>
+            </div>
+
+            <div class="users-grid">
+                {% set avatar_colors = ['avatar-purple','avatar-blue','avatar-pink','avatar-teal','avatar-orange'] %}
+                {% for req in pendingRequests %}
+                <div class="user-card" style="border-color:rgba(168,85,247,0.2);">
+                    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#a855f7,#38bdf8);opacity:1;"></div>
+                    <div class="user-avatar {{ avatar_colors[loop.index0 % 5] }}">
+                        {{ req.user.nom|first|upper }}
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">{{ req.user.nom ?: req.user.userIdentifier }}</div>
+                        <div class="user-email">{{ req.user.email }} · {{ req.createdAt|date('d/m/Y H:i') }}</div>
+                    </div>
+                    <div style="display:flex;gap:8px;flex-shrink:0;">
+                        <form method="post" action="{{ path('app_equipe_handle_join_request', {id: equipe.id, requestId: req.id, action: 'accept'}) }}">
+                            <button type="submit" class="btn-invite btn-add-player">
+                                ✓ Accepter
+                            </button>
+                        </form>
+                        <form method="post" action="{{ path('app_equipe_handle_join_request', {id: equipe.id, requestId: req.id, action: 'reject'}) }}">
+                            <button type="submit" class="btn-remove" style="width:auto;padding:10px 16px;border-radius:12px;font-size:0.85rem;font-weight:700;">
+                                ✕ Refuser
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
         {# ── Search ── #}
         <div class="search-section">
             <div class="search-box">

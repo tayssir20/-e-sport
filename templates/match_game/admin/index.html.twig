@@ -135,20 +135,20 @@
         </div>
         <div class="col-md-3">
             <div class="card stat-card">
-                <div class="number">{{ match_games|filter(m => m.statut == 'TERMINE')|length }}</div>
+                <div class="number">{{ match_games|filter(m => m.statut == 'Finished')|length }}</div>
                 <div class="label">Finished</div>
             </div>
         </div>
       
         <div class="col-md-3">
             <div class="card stat-card">
-                <div class="number">{{ match_games|filter(m => m.statut == 'EN COURS')|length }}</div>
+                <div class="number">{{ match_games|filter(m => m.statut == 'In Progress')|length }}</div>
                 <div class="label">In Progress</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card stat-card">
-                <div class="number">{{ match_games|filter(m => m.statut == 'EN ATTENTE')|length }}</div>
+                <div class="number">{{ match_games|filter(m => m.statut == 'Pending')|length }}</div>
                 <div class="label">Pending</div>
             </div>
         </div>
@@ -196,7 +196,7 @@
                             </div>
                         </td>
                         <td>
-                            {% if match_game.statut != 'EN ATTENTE' %}
+                            {% if match_game.statut != 'Pending' %}
                                 <span class="fw-bold">{{ match_game.scoreTeam1 }} - {{ match_game.scoreTeam2 }}</span>
                             {% else %}
                                 <span class="badge badge-pending">{{ match_game.statut }}</span>

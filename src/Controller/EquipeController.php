@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Entity\Tournoi;
 use App\Entity\MatchGame;
 use App\Entity\InscriptionTournoi;
+use App\Entity\JoinRequest;
 use App\Form\Equipe1Type;
 use App\Repository\MatchGameRepository;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -25,20 +26,32 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 final class EquipeController extends AbstractController
 {
     #[Route(name: 'app_equipe_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(EntityManagerInterface $entityManager): Response
     {
-        return $this->render('equipe/index.html.twig');
+        $ranking = $this->computeGlobalRanking($entityManager);
+
+        return $this->render('equipe/index.html.twig', [
+            'ranking' => $ranking,
+        ]);
     }
 
-    #[Route('/equipes', name: 'app_equipe_list', methods: ['GET'])]
+      #[Route('/equipes', name: 'app_equipe_list', methods: ['GET'])]
     public function get(EntityManagerInterface $entityManager): Response
     {
         $equipes = $entityManager->getRepository(Equipe::class)->findAll();
 
+        $ranking = $this->computeGlobalRanking($entityManager);
+        $rankingByTeamId = [];
+        foreach ($ranking as $r) {
+            $rankingByTeamId[$r['equipe']->getId()] = $r;
+        }
+
         return $this->render('equipe/afficher.html.twig', [
             'equipes' => $equipes,
+            'rankingByTeamId' => $rankingByTeamId,
         ]);
     }
+
 
     #[Route('/new', name: 'app_equipe_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
@@ -217,11 +230,18 @@ final class EquipeController extends AbstractController
             return $this->redirectToRoute('app_equipe_membres', ['id' => $id]);
         }
     
+        // Pending join requests
+        $pendingRequests = $entityManager->getRepository(JoinRequest::class)->findBy([
+            'equipe' => $equipe,
+            'status' => 'pending',
+        ], ['createdAt' => 'DESC']);
+
         return $this->render('equipe/invite.html.twig', [
             'equipe'    => $equipe,
             'users'     => $users,
             'teamUsers' => $teamUsers,
             'isOwner'   => $this->getUser() === $equipe->getOwner(),
+            'pendingRequests' => $pendingRequests,
         ]);
     }
 
@@ -254,7 +274,7 @@ final class EquipeController extends AbstractController
         return $this->redirectToRoute('app_equipe_membres', ['id' => $id]);
     }
 
-    #[Route('/my-teams', name: 'app_my_teams', methods: ['GET'])]
+  #[Route('/my-teams', name: 'app_my_teams', methods: ['GET'])]
     public function myTeams(EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
@@ -282,7 +302,7 @@ final class EquipeController extends AbstractController
                 ->where('m.equipe1 IN (:teamIds) OR m.equipe2 IN (:teamIds)')
                 ->andWhere('m.statut = :status')
                 ->setParameter('teamIds', $teamIds)
-                ->setParameter('status', 'TERMINE')
+                ->setParameter('status', 'Finished')
                 ->getQuery()
                 ->getResult();
 
@@ -344,29 +364,69 @@ final class EquipeController extends AbstractController
             ->where('m.equipe1 = :team OR m.equipe2 = :team')
             ->andWhere('m.statut = :status') // Count only finished matches for stats
             ->setParameter('team', $equipe)
-            ->setParameter('status', 'TERMINE')
+            ->setParameter('status', 'Finished')
             ->getQuery()
             ->getResult();
             
         $totalMatches = count($matches);
         $wins = 0;
+        $goalsFor = 0;
+        $goalsAgainst = 0;
         
         foreach ($matches as $match) {
-            if ($match->getEquipe1() === $equipe && $match->getScoreTeam1() > $match->getScoreTeam2()) {
-                $wins++;
-            } elseif ($match->getEquipe2() === $equipe && $match->getScoreTeam2() > $match->getScoreTeam1()) {
-                $wins++;
+            $s1 = $match->getScoreTeam1() ?? 0;
+            $s2 = $match->getScoreTeam2() ?? 0;
+
+            if ($match->getEquipe1() === $equipe) {
+                $goalsFor += $s1;
+                $goalsAgainst += $s2;
+                if ($s1 > $s2) {
+                    $wins++;
+                }
+            } elseif ($match->getEquipe2() === $equipe) {
+                $goalsFor += $s2;
+                $goalsAgainst += $s1;
+                if ($s2 > $s1) {
+                    $wins++;
+                }
             }
         }
         
         $winRate = $totalMatches > 0 ? round(($wins / $totalMatches) * 100) : 0;
+        $goalDifference = $goalsFor - $goalsAgainst;
+        $goalAverage = $totalMatches > 0 ? round($goalsFor / $totalMatches, 1) : 0;
+
+        // Get team rank from global ranking
+        $ranking = $this->computeGlobalRanking($entityManager);
+        $teamRank = null;
+        foreach ($ranking as $r) {
+            if ($r['equipe']->getId() === $equipe->getId()) {
+                $teamRank = (object)$r;
+                break;
+            }
+        }
+
+        // Pending join requests (for owner)
+        $pendingRequests = [];
+        if ($membership['role'] === 'LEADER') {
+            $pendingRequests = $entityManager->getRepository(JoinRequest::class)->findBy([
+                'equipe' => $equipe,
+                'status' => 'pending',
+            ], ['createdAt' => 'DESC']);
+        }
 
         return $this->render('equipe/dashboard.html.twig', [
             'team' => $equipe,
             'membership' => (object)$membership,
             'totalMatches' => $totalMatches,
             'wins' => $wins,
-            'winRate' => $winRate
+            'winRate' => $winRate,
+            'goalsFor' => $goalsFor,
+            'goalsAgainst' => $goalsAgainst,
+            'goalAverage' => $goalAverage,
+            'goalDifference' => $goalDifference,
+            'teamRank' => $teamRank,
+            'pendingRequests' => $pendingRequests,
         ]);
     }
 
@@ -382,19 +442,77 @@ final class EquipeController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
+        // Already a member
         if ($equipe->getMembers()->contains($user)) {
             return $this->redirectToRoute('app_equipe_dashboard', ['id' => $equipe->getId()]);
         }
 
+        // Team is full
         if ($equipe->getMembers()->count() >= $equipe->getMaxMembers()) {
-             return $this->redirectToRoute('app_equipe_dashboard', ['id' => $equipe->getId()]);
+            $this->addFlash('error', 'L\'équipe est pleine.');
+            return $this->redirectToRoute('app_equipe_discover');
         }
-        
-        $equipe->addMember($user);
+
+        // Check for existing pending request
+        $existingRequest = $entityManager->getRepository(JoinRequest::class)->findOneBy([
+            'equipe' => $equipe,
+            'user' => $user,
+            'status' => 'pending',
+        ]);
+
+        if ($existingRequest) {
+            $this->addFlash('info', 'Vous avez déjà une demande en attente pour cette équipe.');
+            return $this->redirectToRoute('app_equipe_discover');
+        }
+
+        // Create pending join request
+        $joinRequest = new JoinRequest();
+        $joinRequest->setEquipe($equipe);
+        $joinRequest->setUser($user);
+        $joinRequest->setStatus('pending');
+
+        $entityManager->persist($joinRequest);
         $entityManager->flush();
-        
-        
-        return $this->redirectToRoute('app_equipe_dashboard', ['id' => $equipe->getId()]);
+
+        $this->addFlash('success', 'Votre demande a été envoyée ! En attente de l\'approbation du propriétaire.');
+        return $this->redirectToRoute('app_equipe_discover');
+    }
+
+    #[Route('/{id<\d+>}/join-request/{requestId<\d+>}/{action}', name: 'app_equipe_handle_join_request', methods: ['POST'])]
+    public function handleJoinRequest(int $id, int $requestId, string $action, EntityManagerInterface $entityManager): Response
+    {
+        $equipe = $entityManager->getRepository(Equipe::class)->find($id);
+        if (!$equipe) {
+            return $this->redirectToRoute('app_equipe_index');
+        }
+
+        // Only the owner can handle join requests
+        if ($this->getUser() !== $equipe->getOwner()) {
+            throw $this->createAccessDeniedException('Seul le propriétaire peut gérer les demandes.');
+        }
+
+        $joinRequest = $entityManager->getRepository(JoinRequest::class)->find($requestId);
+        if (!$joinRequest || $joinRequest->getEquipe() !== $equipe || $joinRequest->getStatus() !== 'pending') {
+            $this->addFlash('error', 'Demande introuvable ou déjà traitée.');
+            return $this->redirectToRoute('app_equipe_dashboard', ['id' => $id]);
+        }
+
+        if ($action === 'accept') {
+            if ($equipe->getMembers()->count() >= $equipe->getMaxMembers()) {
+                $this->addFlash('error', 'Impossible d\'accepter : l\'équipe est pleine.');
+            } else {
+                $equipe->addMember($joinRequest->getUser());
+                $joinRequest->setStatus('accepted');
+                $this->addFlash('success', $joinRequest->getUser()->getNom() . ' a été ajouté à l\'équipe !');
+            }
+        } elseif ($action === 'reject') {
+            $joinRequest->setStatus('rejected');
+            $this->addFlash('info', 'Demande refusée.');
+        }
+
+        $entityManager->flush();
+
+        return $this->redirectToRoute('app_equipe_dashboard', ['id' => $id]);
     }
     
     #[Route('/{id<\d+>}/leave', name: 'app_equipe_leave', methods: ['POST'])]
@@ -411,8 +529,7 @@ final class EquipeController extends AbstractController
         }
         return $this->redirectToRoute('app_equipe_index');
     }
-
-    #[Route('/not-member', name: 'app_equipe_not_member', methods: ['GET'])]
+#[Route('/discover', name: 'app_equipe_discover', methods: ['GET'])]
     public function notMember(EntityManagerInterface $entityManager): Response 
     {
         $user = $this->getUser();
@@ -427,10 +544,123 @@ final class EquipeController extends AbstractController
                 $userTeamIds[] = $team->getId();
             }
         }
+
+        // Get team IDs where user has a pending join request
+        $pendingRequests = $entityManager->getRepository(JoinRequest::class)->findBy([
+            'user' => $user,
+            'status' => 'pending',
+        ]);
+        $pendingTeamIds = [];
+        foreach ($pendingRequests as $pr) {
+            $pendingTeamIds[] = $pr->getEquipe()->getId();
+        }
+
+        $ranking = $this->computeGlobalRanking($entityManager);
+        // Build a lookup: teamId -> ranking entry
+        $rankingByTeamId = [];
+        foreach ($ranking as $r) {
+            $rankingByTeamId[$r['equipe']->getId()] = $r;
+        }
         
         return $this->render('equipe/afficher.html.twig', [
             'equipes' => $equipes,
             'user_team_ids' => $userTeamIds,
+            'pendingTeamIds' => $pendingTeamIds,
+            'rankingByTeamId' => $rankingByTeamId,
         ]);
+    }
+
+    
+    private function computeGlobalRanking(EntityManagerInterface $entityManager): array
+    {
+        $allTeams = $entityManager->getRepository(Equipe::class)->findAll();
+        $finishedMatches = $entityManager->getRepository(MatchGame::class)->createQueryBuilder('m')
+            ->where('m.statut = :status')
+            ->setParameter('status', 'Finished')
+            ->getQuery()
+            ->getResult();
+
+        $stats = [];
+        foreach ($allTeams as $team) {
+            $id = $team->getId();
+            $stats[$id] = [
+                'equipe' => $team,
+                'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0,
+                'bp' => 0, 'bc' => 0,
+            ];
+        }
+
+        foreach ($finishedMatches as $m) {
+            $eq1 = $m->getEquipe1();
+            $eq2 = $m->getEquipe2();
+            if (!$eq1 || !$eq2) continue;
+
+            $id1 = $eq1->getId();
+            $id2 = $eq2->getId();
+            $s1 = $m->getScoreTeam1() ?? 0;
+            $s2 = $m->getScoreTeam2() ?? 0;
+
+            if (!isset($stats[$id1])) {
+                $stats[$id1] = ['equipe' => $eq1, 'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0, 'bp' => 0, 'bc' => 0];
+            }
+            if (!isset($stats[$id2])) {
+                $stats[$id2] = ['equipe' => $eq2, 'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0, 'bp' => 0, 'bc' => 0];
+            }
+
+            $stats[$id1]['mj']++;
+            $stats[$id2]['mj']++;
+            $stats[$id1]['bp'] += $s1;
+            $stats[$id1]['bc'] += $s2;
+            $stats[$id2]['bp'] += $s2;
+            $stats[$id2]['bc'] += $s1;
+
+            if ($s1 > $s2) {
+                $stats[$id1]['v']++;
+                $stats[$id2]['p']++;
+            } elseif ($s1 < $s2) {
+                $stats[$id2]['v']++;
+                $stats[$id1]['p']++;
+            } else {
+                $stats[$id1]['n']++;
+                $stats[$id2]['n']++;
+            }
+        }
+
+        // Calculate derived stats
+        foreach ($stats as &$s) {
+            $s['pts'] = $s['v'] * 3 + $s['n'];
+            $s['diff'] = $s['bp'] - $s['bc'];
+            $s['ppm'] = $s['mj'] > 0 ? round($s['pts'] / $s['mj'], 2) : 0;
+
+            // Badge
+            if ($s['ppm'] >= 2.5) {
+                $s['badge'] = 'Elite';
+            } elseif ($s['ppm'] >= 1.5) {
+                $s['badge'] = 'Competitive';
+            } else {
+                $s['badge'] = 'Beginner';
+            }
+        }
+        unset($s);
+
+        // Sort: PPM desc, diff desc, bp desc, wins desc
+        uasort($stats, static function ($a, $b) {
+            $cmp = $b['ppm'] <=> $a['ppm'];
+            if ($cmp !== 0) return $cmp;
+            $cmp = $b['diff'] <=> $a['diff'];
+            if ($cmp !== 0) return $cmp;
+            $cmp = $b['bp'] <=> $a['bp'];
+            if ($cmp !== 0) return $cmp;
+            return $b['v'] <=> $a['v'];
+        });
+
+        $result = [];
+        $rang = 1;
+        foreach ($stats as $s) {
+            $s['rang'] = $rang++;
+            $result[] = $s;
+        }
+
+        return $result;
     }
 }

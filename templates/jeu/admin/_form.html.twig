@@ -35,9 +35,26 @@
         padding-top: 2rem;
         border-top: 1px solid rgba(148, 163, 184, 0.1);
     }
+
+    .admin-form .invalid-feedback,
+    .admin-form .form-error,
+    .admin-form ul li {
+        display: block;
+        color: #f87171 !important;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+        list-style: none;
+        padding-left: 0;
+    }
+    .admin-form ul {
+        list-style: none;
+        padding-left: 0;
+        margin: 0.5rem 0 0 0;
+    }
 </style>
 
-{{ form_start(form, {'attr': {'class': 'admin-form'}}) }}
+{{ form_start(form, {'attr': {'class': 'admin-form', 'novalidate': 'novalidate'}}) }}
     <div class="form-grid">
         <div class="form-group">
             {{ form_label(form.nom) }}

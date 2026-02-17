@@ -17,6 +17,56 @@
                     {% endif %}
                 </div>
 
+                {% if equipesRejoignables|length > 0 %}
+                    <div class="join-teams-block">
+                        <h2 class="join-teams-title"><i class="fas fa-user-plus me-2"></i>Rejoindre une équipe inscrite</h2>
+                        <p class="join-teams-desc">Ces équipes sont déjà inscrites au tournoi et recherchent des membres :</p>
+                        <ul class="join-teams-list">
+                            {% for equipe in equipesRejoignables %}
+                                <li class="join-team-item">
+                                    <div class="join-team-info">
+                                        {% if equipe.logo %}
+                                            <img src="{{ equipe.logo }}" alt="{{ equipe.nom }}" class="join-team-logo">
+                                        {% else %}
+                                            <div class="join-team-logo-placeholder"><i class="fas fa-users"></i></div>
+                                        {% endif %}
+                                        <div>
+                                            <span class="join-team-name">{{ equipe.nom }}</span>
+                                            <span class="join-team-places">{{ (equipe.maxMembers - equipe.members|length) }} place(s) disponible(s)</span>
+                                        </div>
+                                    </div>
+                                    <form method="post" action="{{ path('app_tournoi_rejoindre_equipe', { id: tournoi.id }) }}" class="join-team-form">
+                                        <input type="hidden" name="token" value="{{ csrf_token('rejoindre_equipe_tournoi') }}">
+                                        <input type="hidden" name="equipe_id" value="{{ equipe.id }}">
+                                        <button type="submit" class="btn btn-join-team">
+                                            <i class="fas fa-user-plus me-2"></i>Rejoindre
+                                        </button>
+                                    </form>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% if equipes|length > 0 %}
+                    <div class="register-divider">
+                        <span class="divider-line"></span>
+                        <span class="divider-text">ou inscrire votre équipe</span>
+                        <span class="divider-line"></span>
+                    </div>
+                    {% else %}
+                    <div class="register-divider">
+                        <span class="divider-line"></span>
+                        <span class="divider-text">ou</span>
+                        <span class="divider-line"></span>
+                    </div>
+                    <div class="create-team-option">
+                        <p class="create-team-label">Créez votre propre équipe pour participer</p>
+                        <a href="{{ path('app_equipe_new', { return_to_tournoi: tournoi.id }) }}" class="btn btn-secondary-action">
+                            <i class="fas fa-plus-circle me-2"></i>Créer une équipe
+                        </a>
+                    </div>
+                    {% endif %}
+                {% endif %}
+
                 {% if equipes|length > 0 %}
                     <form method="post" action="{{ path('app_tournoi_register', { id: tournoi.id }) }}" class="registration-form">
                         <input type="hidden" name="token" value="{{ csrf_token('register_tournament') }}">
@@ -44,7 +94,7 @@
                             <i class="fas fa-plus-circle me-2"></i>Créer une nouvelle équipe
                         </a>
                     </div>
-                {% else %}
+                {% elseif equipesRejoignables|length == 0 %}
                     <div class="no-teams-block">
                         <div class="no-teams-icon"><i class="fas fa-user-friends"></i></div>
                         <p class="no-teams-text">Vous n'avez pas encore d'équipe.<br>Créez-en une pour vous inscrire à ce tournoi.</p>
@@ -280,5 +330,82 @@
     color: #e2e8f0;
 }
 .me-2 { margin-right: 8px; }
+.join-teams-block {
+    margin-bottom: 24px;
+}
+.join-teams-title {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+}
+.join-teams-desc {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    margin: 0 0 16px 0;
+}
+.join-teams-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.join-team-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    margin-bottom: 10px;
+}
+.join-team-item:last-child { margin-bottom: 0; }
+.join-team-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.join-team-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+.join-team-logo-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(139, 92, 246, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #a78bfa;
+}
+.join-team-name {
+    color: #e2e8f0;
+    font-weight: 600;
+    font-size: 1rem;
+    display: block;
+}
+.join-team-places {
+    color: #94a3b8;
+    font-size: 0.8rem;
+}
+.join-team-form { margin: 0; }
+.btn-join-team {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #fff;
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+.btn-join-team:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: #fff;
+    transform: translateY(-1px);
+}
 </style>
 {% endblock %}

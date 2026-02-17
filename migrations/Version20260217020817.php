@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20260215234158 extends AbstractMigration
+final class Version20260217020817 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -36,6 +36,7 @@ final class Version20260215234158 extends AbstractMigration
         $this->addSql('CREATE TABLE product (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(255) NOT NULL, description LONGTEXT NOT NULL, price DOUBLE PRECISION NOT NULL, stock INT NOT NULL, image VARCHAR(255) NOT NULL, category_id INT NOT NULL, INDEX IDX_D34A04AD12469DE2 (category_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE ranking (id INT AUTO_INCREMENT NOT NULL, nm VARCHAR(255) NOT NULL, PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE result (id INT AUTO_INCREMENT NOT NULL, m VARCHAR(255) NOT NULL, PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('CREATE TABLE stream (id INT AUTO_INCREMENT NOT NULL, url VARCHAR(255) NOT NULL, is_active TINYINT NOT NULL, created_at DATETIME NOT NULL, match_game_id INT NOT NULL, INDEX IDX_F0E9BE1C9329866A (match_game_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE tournoi (id INT AUTO_INCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, date_debut DATETIME NOT NULL, date_fin DATETIME NOT NULL, statut VARCHAR(255) NOT NULL, type VARCHAR(255) NOT NULL, max_participants INT DEFAULT NULL, cagnotte DOUBLE PRECISION DEFAULT NULL, date_inscription_limite DATETIME DEFAULT NULL, frais_inscription DOUBLE PRECISION DEFAULT NULL, description LONGTEXT DEFAULT NULL, jeu_id INT DEFAULT NULL, INDEX IDX_18AFD9DF8C9E392E (jeu_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE `user` (id INT AUTO_INCREMENT NOT NULL, email VARCHAR(180) NOT NULL, roles JSON NOT NULL, password VARCHAR(255) NOT NULL, nom VARCHAR(100) NOT NULL, is_active TINYINT NOT NULL, UNIQUE INDEX UNIQ_8D93D649E7927C74 (email), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE messenger_messages (id BIGINT AUTO_INCREMENT NOT NULL, body LONGTEXT NOT NULL, headers LONGTEXT NOT NULL, queue_name VARCHAR(190) NOT NULL, created_at DATETIME NOT NULL, available_at DATETIME NOT NULL, delivered_at DATETIME DEFAULT NULL, INDEX IDX_75EA56E0FB7336F0E3BD61CE16BA31DBBF396750 (queue_name, available_at, delivered_at, id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
@@ -58,6 +59,7 @@ final class Version20260215234158 extends AbstractMigration
         $this->addSql('ALTER TABLE order_item ADD CONSTRAINT FK_52EA1F098D9F6D38 FOREIGN KEY (order_id) REFERENCES `order` (id)');
         $this->addSql('ALTER TABLE order_item ADD CONSTRAINT FK_52EA1F094584665A FOREIGN KEY (product_id) REFERENCES product (id)');
         $this->addSql('ALTER TABLE product ADD CONSTRAINT FK_D34A04AD12469DE2 FOREIGN KEY (category_id) REFERENCES category (id)');
+        $this->addSql('ALTER TABLE stream ADD CONSTRAINT FK_F0E9BE1C9329866A FOREIGN KEY (match_game_id) REFERENCES match_game (id)');
         $this->addSql('ALTER TABLE tournoi ADD CONSTRAINT FK_18AFD9DF8C9E392E FOREIGN KEY (jeu_id) REFERENCES jeu (id)');
     }
 
@@ -83,6 +85,7 @@ final class Version20260215234158 extends AbstractMigration
         $this->addSql('ALTER TABLE order_item DROP FOREIGN KEY FK_52EA1F098D9F6D38');
         $this->addSql('ALTER TABLE order_item DROP FOREIGN KEY FK_52EA1F094584665A');
         $this->addSql('ALTER TABLE product DROP FOREIGN KEY FK_D34A04AD12469DE2');
+        $this->addSql('ALTER TABLE stream DROP FOREIGN KEY FK_F0E9BE1C9329866A');
         $this->addSql('ALTER TABLE tournoi DROP FOREIGN KEY FK_18AFD9DF8C9E392E');
         $this->addSql('DROP TABLE blog');
         $this->addSql('DROP TABLE cart');
@@ -100,6 +103,7 @@ final class Version20260215234158 extends AbstractMigration
         $this->addSql('DROP TABLE product');
         $this->addSql('DROP TABLE ranking');
         $this->addSql('DROP TABLE result');
+        $this->addSql('DROP TABLE stream');
         $this->addSql('DROP TABLE tournoi');
         $this->addSql('DROP TABLE `user`');
         $this->addSql('DROP TABLE messenger_messages');

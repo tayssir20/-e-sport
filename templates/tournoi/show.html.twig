@@ -23,9 +23,9 @@
 
                     {% set canRegister = slug not in ['en_cours','encours','termine'] %}
                     {% if canRegister %}
-                        <a href="{{ path('app_tournoi_register', {'id': tournoi.id}) }}" class="btn-register">S'inscrire</a>
+                        <a href="{{ path('app_tournoi_register', {'id': tournoi.id}) }}" class="btn-details">S'inscrire</a>
                     {% else %}
-                        <button class="btn-register disabled" disabled>
+                        <button class="btn-details disabled" disabled>
                             {% if slug == 'en_cours' %}Tournoi en cours{% else %}Inscriptions fermées{% endif %}
                         </button>
                     {% endif %}
@@ -134,7 +134,7 @@
                             <span>Certificat de participation</span>
                         </div>
                     </div>
-                    <a href="{{ path('app_tournoi_register', {'id': tournoi.id}) }}" class="btn-register-large">S'inscrire maintenant</a>
+                    <a href="{{ path('app_tournoi_register', {'id': tournoi.id}) }}" class="btn-details-large">S'inscrire maintenant</a>
                 </div>
             </div>
         </div>
@@ -197,7 +197,7 @@
         text-align: center;
     }
 
-    .btn-register {
+    .btn-details {
         display: inline-block;
         background: white;
         color: #ff006e;
@@ -210,13 +210,13 @@
         border: 2px solid white;
     }
 
-    .btn-register:hover {
+    .btn-details:hover {
         background: transparent;
         color: white;
     }
 
     /* forcer le bouton d'inscription au premier plan pour être cliquable */
-    .btn-register, .btn-register-large {
+    .btn-details, .btn-details-large {
         position: relative;
         z-index: 99999;
         pointer-events: auto;
@@ -362,7 +362,7 @@
         font-size: 1.2em;
     }
 
-    .btn-register-large {
+    .btn-details-large {
         display: inline-block;
         width: 100%;
         background: linear-gradient(135deg, #ff006e, #8338ec);
@@ -380,7 +380,7 @@
         box-sizing: border-box;
     }
 
-    .btn-register-large:hover {
+    .btn-details-large:hover {
         transform: scale(1.02);
         box-shadow: 0 15px 35px rgba(255, 0, 110, 0.3);
     }
@@ -403,120 +403,4 @@
         }
     }
 </style>
-<style>
-/* simple modal styles (for AJAX registration modal) */
-.remote-modal-backdrop{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.5);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:200000;
-}
-.remote-modal{
-  width:min(980px,95%);
-  max-height:90vh;
-  overflow:auto;
-  background:#fff;
-  border-radius:12px;
-  padding:18px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.4);
-  position:relative;
-}
-.remote-modal .close-btn{
-  position:absolute;
-  right:12px;
-  top:8px;
-  background:transparent;
-  border:none;
-  font-size:20px;
-  cursor:pointer;
-}
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-    // Intercept clicks and open register page inside a modal (AJAX) when possible.
-    document.querySelectorAll('.btn-register, .btn-register-large').forEach(function(el){
-        if(el.tagName.toLowerCase() !== 'a') return;
-        el.addEventListener('click', function(e){
-            const href = el.getAttribute('href');
-            if(!href || href === '#') {
-                e.preventDefault();
-                return;
-            }
-            // Try AJAX modal, fallback to full navigation on error
-            e.preventDefault();
-            openRegisterModal(href);
-        });
-    });
-});
-
-function openRegisterModal(url){
-  let existing = document.getElementById('remoteModalBackdrop');
-  if(!existing){
-    existing = document.createElement('div');
-    existing.id = 'remoteModalBackdrop';
-    existing.className = 'remote-modal-backdrop';
-    existing.style.display = 'none';
-    document.body.appendChild(existing);
-  }
-  existing.innerHTML = '<div class=\"remote-modal\" role=\"dialog\" aria-modal=\"true\"><button class=\"close-btn\" aria-label=\"Fermer\">✕</button><div class=\"remote-modal-body\" style=\"padding-top:8px\"></div></div>';
-  existing.style.display = 'flex';
-
-  const closeBtn = existing.querySelector('.close-btn');
-  closeBtn.addEventListener('click', closeModal);
-  existing.addEventListener('click', function(ev){
-    if(ev.target === existing) closeModal();
-  });
-
-  fetch(url, { credentials: 'same-origin' })
-    .then(resp => resp.text())
-    .then(html => {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      let fragment = doc.querySelector('.registration-wrap') || doc.querySelector('.registration-card') || doc.querySelector('form.registration-form') || doc.body;
-      const body = existing.querySelector('.remote-modal-body');
-      if(fragment){
-        body.innerHTML = '';
-        body.appendChild(fragment.cloneNode(true));
-        const f = body.querySelector('form');
-        if(f){
-          // ensure form posts to register URL
-          f.setAttribute('action', url);
-          // simple client-side validation
-          f.addEventListener('submit', function(ev){
-            const sel = f.querySelector('select[name=\"equipe_id\"]');
-            if(sel && !sel.value){
-              ev.preventDefault();
-              if(!body.querySelector('.form-error')){
-                const err = document.createElement('div');
-                err.className = 'form-error';
-                err.style.color = '#c53030';
-                err.style.marginTop = '8px';
-                err.textContent = 'Veuillez sélectionner une équipe.';
-                f.appendChild(err);
-              }
-              return false;
-            }
-            return true;
-          });
-        }
-      } else {
-        body.innerHTML = '<pre>' + html.substring(0,2000) + '...</pre>';
-      }
-    })
-    .catch(err => {
-      console.error('Fetch register failed:', err);
-      // fallback navigation
-      window.location.href = url;
-    });
-}
-
-function closeModal(){
-  const existing = document.getElementById('remoteModalBackdrop');
-  if(existing) existing.style.display = 'none';
-}
-</script>
 {% endblock %}

@@ -477,6 +477,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {{ 'admin_stream' in app.request.get('_route') ? 'active' : '' }}" 
+                        href="{{ path('admin_stream_index') }}">
+                        <i class="fas fa-video"></i>
+                          <span>Streaming</span>
+                         </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {{ 'admin_equipe' in app.request.get('_route') ? 'active' : '' }}" href="{{ path('admin_equipe_index') }}">
                             <i class="fas fa-users"></i>
                             <span>Teams</span>
@@ -486,6 +493,12 @@
                         <a class="nav-link {{ 'admin_jeu' in app.request.get('_route') ? 'active' : '' }}" href="{{ path('admin_jeu_index') }}">
                             <i class="fas fa-gamepad"></i>
                             <span>Games</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'admin_tournoi' in app.request.get('_route') ? 'active' : '' }}" href="{{ path('admin_tournoi_index') }}">
+                            <i class="fas fa-trophy"></i>
+                            <span>Tournois</span>
                         </a>
                     </li>
                    <li class="nav-item">

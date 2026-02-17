@@ -1,0 +1,138 @@
+<style>
+    .admin-form .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .admin-form .form-control,
+    .admin-form .form-select {
+        color: #e2e8f0;
+        background: rgba(30, 41, 59, 0.5);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        transition: all 0.2s ease;
+        font-size: 0.95rem;
+    }
+
+    .admin-form label {
+        color: #e2e8f0;
+        font-weight: 500;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-group-full {
+        grid-column: 1 / -1;
+    }
+
+    .form-btn-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2.5rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .admin-form .invalid-feedback,
+    .admin-form .form-error,
+    .admin-form ul li {
+        display: block;
+        color: #f87171 !important;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+        list-style: none;
+        padding-left: 0;
+    }
+    .admin-form ul {
+        list-style: none;
+        padding-left: 0;
+        margin: 0.5rem 0 0 0;
+    }
+</style>
+
+{{ form_start(form, {'attr': {'class': 'admin-form', 'novalidate': 'novalidate'}}) }}
+    <div class="form-grid">
+        <div class="form-group">
+            {{ form_label(form.nom) }}
+            {{ form_widget(form.nom) }}
+            {{ form_errors(form.nom) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.jeu) }}
+            {{ form_widget(form.jeu) }}
+            {{ form_errors(form.jeu) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.type) }}
+            {{ form_widget(form.type) }}
+            {{ form_errors(form.type) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.statut) }}
+            {{ form_widget(form.statut) }}
+            {{ form_errors(form.statut) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.date_debut) }}
+            {{ form_widget(form.date_debut) }}
+            {{ form_errors(form.date_debut) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.date_fin) }}
+            {{ form_widget(form.date_fin) }}
+            {{ form_errors(form.date_fin) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.dateInscriptionLimite) }}
+            {{ form_widget(form.dateInscriptionLimite) }}
+            {{ form_errors(form.dateInscriptionLimite) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.maxParticipants) }}
+            {{ form_widget(form.maxParticipants) }}
+            {{ form_errors(form.maxParticipants) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.cagnotte) }}
+            {{ form_widget(form.cagnotte) }}
+            {{ form_errors(form.cagnotte) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.fraisInscription) }}
+            {{ form_widget(form.fraisInscription) }}
+            {{ form_errors(form.fraisInscription) }}
+        </div>
+
+        <div class="form-group form-group-full">
+            {{ form_label(form.description) }}
+            {{ form_widget(form.description) }}
+            {{ form_errors(form.description) }}
+        </div>
+    </div>
+
+    <div class="form-btn-group">
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-2"></i>{{ button_label|default('Enregistrer') }}
+        </button>
+        <a href="{{ path('admin_tournoi_index') }}" class="btn btn-outline">
+            <i class="fas fa-times me-2"></i>Annuler
+        </a>
+    </div>
+{{ form_end(form) }}

@@ -96,4 +96,23 @@ class TournoiRepository extends ServiceEntityRepository
             ->getOneOrNullResult()
         ;
     }
+
+    /**
+     * Retourne les équipes inscrites au tournoi qui ont des places disponibles
+     * et où l'utilisateur n'est pas déjà membre ou propriétaire.
+     */
+    public function getEquipesRejoignables(Tournoi $tournoi, object $user): array
+    {
+        $equipesInscrites = $this->getEquipesInscrites($tournoi);
+        $rejoignables = [];
+        foreach ($equipesInscrites as $equipe) {
+            if ($equipe->getOwner() === $user || $equipe->getMembers()->contains($user)) {
+                continue;
+            }
+            if ($equipe->getMembers()->count() < $equipe->getMaxMembers()) {
+                $rejoignables[] = $equipe;
+            }
+        }
+        return $rejoignables;
+    }
 }

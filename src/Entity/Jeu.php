@@ -6,6 +6,7 @@ use App\Repository\JeuRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: JeuRepository::class)]
 class Jeu
@@ -16,18 +17,28 @@ class Jeu
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le nom du jeu ne peut pas être vide.')]
+    #[Assert\Length(min: 2, max: 255, minMessage: 'Le nom doit contenir au moins {{ limit }} caractères.', maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le genre ne peut pas être vide.')]
+    #[Assert\Length(min: 2, max: 255, minMessage: 'Le genre doit contenir au moins {{ limit }} caractères.', maxMessage: 'Le genre ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $genre = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'La plateforme ne peut pas être vide.')]
+    #[Assert\Length(min: 2, max: 255, minMessage: 'La plateforme doit contenir au moins {{ limit }} caractères.', maxMessage: 'La plateforme ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $plateforme = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'La description ne peut pas être vide.')]
+    #[Assert\Length(min: 10, max: 255, minMessage: 'La description doit contenir au moins {{ limit }} caractères.', maxMessage: 'La description ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le statut ne peut pas être vide.')]
+    #[Assert\Choice(choices: ['ACTIVE', 'INACTIVE', 'COMING_SOON'], message: 'Le statut doit être ACTIVE, INACTIVE ou COMING_SOON.')]
     private ?string $statut = null;
 
     /**

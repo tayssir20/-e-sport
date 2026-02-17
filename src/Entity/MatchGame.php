@@ -3,8 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\MatchGameRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: MatchGameRepository::class)]
 class MatchGame
@@ -13,8 +16,9 @@ class MatchGame
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-
+    
     #[ORM\Column(type: 'datetime')]
+    #[Assert\NotNull(message: 'Veuillez renseigner la date du match.')]
     private ?\DateTimeInterface $dateMatch = null;
 
     #[ORM\ManyToOne(targetEntity: Equipe::class)]
@@ -41,9 +45,25 @@ class MatchGame
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull(message: 'Veuillez sélectionner un tournoi.')]
     private ?Tournoi $Tournoi = null;
+#[Assert\Callback]
+    public function validateEquipesDifferentes(ExecutionContextInterface $context): void
+    {
+        if ($this->equipe1 !== null && $this->equipe2 !== null && $this->equipe1->getId() === $this->equipe2->getId()) {
+            $context->buildViolation('Les deux équipes ne peuvent pas être identiques. Veuillez choisir deux équipes différentes.')
+                ->atPath('equipe2')
+                ->addViolation();
+        }
+    }
+
+    /**
+     * @var Collection<int, Stream>
+     */
+    #[ORM\OneToMany(targetEntity: Stream::class, mappedBy: 'matchGame')]
+    private Collection $streams;
 public function __construct()
     {
         $this->statut = 'scheduled';
+        $this->streams = new ArrayCollection();
     }
 
     // getters setters
@@ -58,7 +78,7 @@ public function __construct()
         return $this->dateMatch;
     }
 
-    public function setDateMatch(\DateTimeInterface $dateMatch): self
+    public function setDateMatch(?\DateTimeInterface $dateMatch): self
     {
         $this->dateMatch = $dateMatch;
         return $this;
@@ -127,6 +147,37 @@ public function __construct()
     public function setTournoi(?Tournoi $Tournoi): self
     {
         $this->Tournoi = $Tournoi;
+        return $this;
+    }
+    
+
+    /**
+     * @return Collection<int, Stream>
+     */
+    public function getStreams(): Collection
+    {
+        return $this->streams;
+    }
+
+    public function addStreams(Stream $streams): static
+    {
+        if (!$this->streams->contains($streams)) {
+            $this->streams->add($streams);
+            $streams->setMatchGame($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStreams(Stream $streams): static
+    {
+        if ($this->streams->removeElement($streams)) {
+            // set the owning side to null (unless already changed)
+            if ($streams->getMatchGame() === $this) {
+                $streams->setMatchGame(null);
+            }
+        }
+
         return $this;
     }
 }
