@@ -1,24 +1,24 @@
 {# templates/equipe/_form.html.twig #}
-{{ form_start(form, {'attr': {'class': 'needs-validation'}, 'multipart': true}) }}
+{{ form_start(form, {'multipart': true}) }}
 {% if return_to_tournoi is defined and return_to_tournoi %}
     <input type="hidden" name="return_to_tournoi" value="{{ return_to_tournoi }}">
 {% endif %}
 
 <div class="mb-4">
     <label class="form-label" style="color: #cbd5e1; font-weight: 600; margin-bottom: 8px; display: block;">Team Name</label>
-    {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Enter team name', 'style': 'background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #e5e7eb; padding: 12px; border-radius: 12px;'}}) }}
+    {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Enter team name', 'style': 'background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #e5e7eb; padding: 12px; border-radius: 12px;'}, 'required': false}) }}
     {{ form_errors(form.nom) }}
 </div>
 
 <div class="mb-4">
     <label class="form-label" style="color: #cbd5e1; font-weight: 600; margin-bottom: 8px; display: block;">Max Members</label>
-    {{ form_widget(form.maxMembers, {'attr': {'class': 'form-control', 'placeholder': 'Enter max members', 'style': 'background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #e5e7eb; padding: 12px; border-radius: 12px;'}}) }}
+    {{ form_widget(form.maxMembers, {'attr': {'class': 'form-control', 'placeholder': 'Enter max members', 'style': 'background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #e5e7eb; padding: 12px; border-radius: 12px;'}, 'required': false, 'min': null, 'max': null}) }}
     {{ form_errors(form.maxMembers) }}
 </div>
 
 <div class="mb-4">
     <label class="form-label" style="color: #cbd5e1; font-weight: 600; margin-bottom: 8px; display: block;">Join Tournaments</label>
-    {{ form_widget(form.Tournois, {'attr': {'class': 'form-select', 'multiple': 'multiple', 'size': 4, 'style': 'background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #000; padding: 12px; border-radius: 12px; min-height:48px; appearance:none; -webkit-appearance:none;'}}) }}
+    {{ form_widget(form.Tournois, {'attr': {'class': 'form-select', 'multiple': 'multiple', 'size': 4, 'style': 'background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #000; padding: 12px; border-radius: 12px; min-height:48px; appearance:none; -webkit-appearance:none;'}, 'required': false}) }}
     <small class="form-text text-muted" style="color: #94a3b8; margin-top: 5px; display: block;">Hold Ctrl/Cmd to select multiple tournaments</small>
     {{ form_errors(form.Tournois) }}
 </div>
@@ -26,7 +26,7 @@
 <div class="mb-4" >
     <label class="form-label" style="color: #cbd5e1; font-weight: 600; margin-bottom: 8px; display: block;">Logo (PNG/JPEG)</label>
     <div style="display:flex;gap:12px;align-items:center;">
-        {{ form_widget(form.logo, {'attr': {'class': 'form-control-file', 'accept': 'image/png,image/jpeg', 'style': 'background: transparent; color: #e5e7eb; padding: 8px 12px; border-radius:8px; border:1px dashed rgba(255,255,255,0.06);'}}) }}
+        {{ form_widget(form.logo, {'attr': {'class': 'form-control-file', 'accept': 'image/png,image/jpeg', 'style': 'background: transparent; color: #e5e7eb; padding: 8px 12px; border-radius:8px; border:1px dashed rgba(255,255,255,0.06);'}, 'required': false}) }}
     </div>
     {{ form_errors(form.logo) }}
 </div>

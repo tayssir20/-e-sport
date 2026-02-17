@@ -477,6 +477,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {{ 'admin_stream' in app.request.get('_route') ? 'active' : '' }}" 
+                        href="{{ path('admin_stream_index') }}">
+                        <i class="fas fa-video"></i>
+                          <span>Streaming</span>
+                         </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {{ 'admin_equipe' in app.request.get('_route') ? 'active' : '' }}" href="{{ path('admin_equipe_index') }}">
                             <i class="fas fa-users"></i>
                             <span>Teams</span>

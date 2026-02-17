@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\MatchGameRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -14,7 +16,8 @@ class MatchGame
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'datetime')]
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    #[Assert\NotNull(message: 'Veuillez renseigner la date du match.')]
     private ?\DateTimeInterface $dateMatch = null;
 
     #[ORM\ManyToOne(targetEntity: Equipe::class)]
@@ -41,9 +44,16 @@ class MatchGame
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull(message: 'Veuillez sélectionner un tournoi.')]
     private ?Tournoi $Tournoi = null;
+
+    /**
+     * @var Collection<int, Stream>
+     */
+    #[ORM\OneToMany(targetEntity: Stream::class, mappedBy: 'matchGame')]
+    private Collection $streams;
 public function __construct()
     {
         $this->statut = 'scheduled';
+        $this->streams = new ArrayCollection();
     }
 
     // getters setters
@@ -58,7 +68,7 @@ public function __construct()
         return $this->dateMatch;
     }
 
-    public function setDateMatch(\DateTimeInterface $dateMatch): self
+    public function setDateMatch(?\DateTimeInterface $dateMatch): self
     {
         $this->dateMatch = $dateMatch;
         return $this;
@@ -127,6 +137,37 @@ public function __construct()
     public function setTournoi(?Tournoi $Tournoi): self
     {
         $this->Tournoi = $Tournoi;
+        return $this;
+    }
+    
+
+    /**
+     * @return Collection<int, Stream>
+     */
+    public function getStreams(): Collection
+    {
+        return $this->streams;
+    }
+
+    public function addStreams(Stream $streams): static
+    {
+        if (!$this->streams->contains($streams)) {
+            $this->streams->add($streams);
+            $streams->setMatchGame($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStreams(Stream $streams): static
+    {
+        if ($this->streams->removeElement($streams)) {
+            // set the owning side to null (unless already changed)
+            if ($streams->getMatchGame() === $this) {
+                $streams->setMatchGame(null);
+            }
+        }
+
         return $this;
     }
 }
