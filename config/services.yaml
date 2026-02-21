@@ -17,7 +17,3 @@ services:
     App\Controller\CheckoutController:
         arguments:
             $stripePublicKey: 'pk_test_51SyCQpLoei8vIeaGcknMwGDsm4lDM914pWg0XIWdmXO5wpoAQ6RVAiF3GRKQncDU6DBsEsTYu9jCthtLmP4V9Ixk00n8YFO5PY'
-    
-    App\Service\GeminiService:
-        arguments:
-            $apiKey: '%env(GROQ_API_KEY)%'
