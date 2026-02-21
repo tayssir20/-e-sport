@@ -4,7 +4,7 @@ namespace App\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-final class Admin/StreamControllerTest extends WebTestCase
+final class AdminStreamControllerTest extends WebTestCase
 {
     public function testIndex(): void
     {

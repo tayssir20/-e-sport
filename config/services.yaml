@@ -1,5 +1,8 @@
 parameters:
     teams_directory: '%kernel.project_dir%/public/uploads/teams'
+    google_oauth_client_id: '%env(GOOGLE_OAUTH_CLIENT_ID)%'
+    google_oauth_client_secret: '%env(GOOGLE_OAUTH_CLIENT_SECRET)%'
+    google_oauth_redirect_url: '%env(GOOGLE_OAUTH_REDIRECT_URL)%'
 
 services:
     # default configuration
@@ -17,3 +20,8 @@ services:
     App\Controller\CheckoutController:
         arguments:
             $stripePublicKey: 'pk_test_51SyCQpLoei8vIeaGcknMwGDsm4lDM914pWg0XIWdmXO5wpoAQ6RVAiF3GRKQncDU6DBsEsTYu9jCthtLmP4V9Ixk00n8YFO5PY'
+    App\Security\GoogleOAuthAuthenticator:
+        arguments:
+            $googleClientId: '%google_oauth_client_id%'
+            $googleClientSecret: '%google_oauth_client_secret%'
+            $redirectUrl: '%google_oauth_redirect_url%'

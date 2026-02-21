@@ -7,5 +7,15 @@
 # To list all registered routes, run the following command:
 #   bin/console debug:router
 
+app_google_oauth:
+    path: /oauth/google
+    controller: App\Controller\GoogleOAuthController::redirectToGoogle
+    methods: [GET]
+
+app_google_callback:
+    path: /oauth/google/callback
+    controller: App\Controller\GoogleOAuthController::handleGoogleCallback
+    methods: [GET]
+
 controllers:
     resource: routing.controllers

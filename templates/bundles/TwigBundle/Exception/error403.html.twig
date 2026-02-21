@@ -1,0 +1,86 @@
+{% block title %}403 - Restricted Area{% endblock %}
+
+{% block stylesheets %}
+<style>
+    body {
+        background: radial-gradient(circle at top, #0f0f1a, #050510);
+        color: #fff;
+        font-family: 'Orbitron', sans-serif;
+    }
+
+    .error-container {
+        height: 90vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .error-code {
+        font-size: 140px;
+        font-weight: 900;
+        background: linear-gradient(90deg, #ff004c, #00f2ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: glitch 1s infinite;
+    }
+
+    .error-title {
+        font-size: 32px;
+        margin-bottom: 20px;
+        color: #ff004c;
+        letter-spacing: 2px;
+    }
+
+    .error-message {
+        font-size: 18px;
+        max-width: 500px;
+        opacity: 0.8;
+        margin-bottom: 30px;
+    }
+
+    .btn-home {
+        padding: 12px 30px;
+        border: 2px solid #00f2ff;
+        color: #00f2ff;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-weight: bold;
+        transition: 0.3s;
+        text-decoration: none;
+    }
+
+    .btn-home:hover {
+        background: #00f2ff;
+        color: #000;
+        box-shadow: 0 0 20px #00f2ff;
+    }
+
+    @keyframes glitch {
+        0% { text-shadow: 2px 2px #ff004c; }
+        50% { text-shadow: -2px -2px #00f2ff; }
+        100% { text-shadow: 2px -2px #ff004c; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="error-container">
+    <div class="error-code">403</div>
+
+    <div class="error-title">
+        ACCESS RESTRICTED
+    </div>
+
+    <div class="error-message">
+        You are logged in as a <strong>USER</strong>.<br>
+        This zone is reserved for <strong>ADMIN </strong> 
+        Only The Admin Can have acces to this area.
+    </div>
+
+    <a href="{{ path('app_home') }}" class="btn-home">
+        Return to Home Page
+    </a>
+</div>
+{% endblock %}

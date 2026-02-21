@@ -19,7 +19,10 @@ security:
         main:
             lazy: true
             provider: app_user_provider
-            custom_authenticator: App\Security\LoginFormAthenticateurAuthenticator
+            entry_point: App\Security\LoginFormAthenticateurAuthenticator
+            custom_authenticators:
+                - App\Security\GoogleOAuthAuthenticator
+                - App\Security\LoginFormAthenticateurAuthenticator
             logout:
                 path: app_logout
                 # where to redirect after logout
@@ -33,7 +36,7 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
 
 when@test:

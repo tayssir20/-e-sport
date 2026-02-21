@@ -1,0 +1,156 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+@keyframes fadeUp {
+    from {opacity:0; transform:translateY(40px);}
+    to {opacity:1; transform:translateY(0);}
+}
+
+body{
+    background: linear-gradient(90deg,#b8325b,#0b4fa3);
+}
+
+.main-wrapper{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:50px 0;
+}
+
+.register-box{
+    width:600px;
+    background:white;
+    border-radius:6px;
+    padding:40px;
+    box-shadow:0 0 30px rgba(0,0,0,.3);
+    animation:fadeUp .8s ease;
+}
+
+h2{
+    font-weight:600;
+    margin-bottom:30px;
+    text-align:center;
+}
+
+.qr-code-container{
+    text-align:center;
+    margin:30px 0;
+}
+
+.qr-code-container img{
+    max-width:200px;
+    border:5px solid #f8f9fa;
+    border-radius:8px;
+}
+
+.secret-key{
+    background:#f8f9fa;
+    padding:15px;
+    border-radius:4px;
+    text-align:center;
+    font-family:monospace;
+    font-size:14px;
+    margin:20px 0;
+}
+
+.form-control{
+    border:none;
+    border-bottom:1px solid #aaa;
+    border-radius:0;
+    transition:.3s;
+}
+
+.form-control:focus{
+    box-shadow:none;
+    border-color:#635bff;
+    padding-left:8px;
+}
+
+.btn-primary{
+    background:linear-gradient(90deg,#635bff,#a52bf9);
+    border:none;
+    padding:12px 30px;
+    border-radius:4px;
+    transition:.4s;
+}
+
+.btn-primary:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 20px rgba(99,91,255,.4);
+}
+
+.alert{
+    font-size:13px;
+    animation:fadeUp .6s ease;
+}
+
+.back-link{
+    text-align:center;
+    margin-top:20px;
+    display:block;
+    color:#635bff;
+    text-decoration:none;
+}
+</style>
+
+<div class="main-wrapper">
+
+<div class="register-box">
+
+    <h2>Setup Two-Factor Authentication</h2>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+
+    <p class="text-center">Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)</p>
+
+    <div class="qr-code-container">
+        {% if qrCodeImage %}
+            <img src="{{ qrCodeImage }}" alt="QR Code">
+        {% else %}
+            <div class="alert alert-warning">
+                <p>QR Code could not be generated. Please use the manual secret key below.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <p class="text-center text-muted">Or enter this secret key manually:</p>
+    <div class="secret-key">{{ secret }}</div>
+
+    <form method="post" action="{{ path('app_2fa_setup') }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('2fa_setup') }}">
+        
+        <div class="mb-3">
+            <label for="2fa_code" class="form-label">Enter verification code</label>
+            <input type="text" 
+                   name="2fa_code" 
+                   class="form-control" 
+                   placeholder="123456"
+                   required 
+                   autofocus
+                   maxlength="6"
+                   pattern="[0-9]*"
+                   inputmode="numeric">
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Verify & Enable 2FA</button>
+
+    </form>
+
+    <a href="{{ path('app_home') }}" class="back-link">Back to Home</a>
+
+</div>
+
+</div>
+
+{% endblock %}

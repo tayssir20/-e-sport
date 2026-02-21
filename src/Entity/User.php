@@ -38,6 +38,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'boolean')]
     private bool $isActive = true;
 
+    #[ORM\Column(name: 'google2fa_secret', type: 'string', length: 255, nullable: true)]
+    private ?string $google2faSecret = null;
+
+    #[ORM\Column(name: 'is_2fa_enabled', type: 'boolean')]
+    private bool $is2faEnabled = false;
+
+    #[ORM\Column(name: 'google_oauth_id', type: 'string', length: 255, nullable: true, unique: true)]
+    private ?string $googleOAuthId = null;
+
+    #[ORM\Column(name: 'oauth_provider', type: 'string', length: 50, nullable: true)]
+    private ?string $oauthProvider = null;
+
     public function __construct()
     {
         $this->roles = ['ROLE_USER'];
@@ -107,6 +119,50 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsActive(bool $isActive): static
     {
         $this->isActive = $isActive;
+        return $this;
+    }
+
+    public function getGoogle2faSecret(): ?string
+    {
+        return $this->google2faSecret;
+    }
+
+    public function setGoogle2faSecret(?string $google2faSecret): static
+    {
+        $this->google2faSecret = $google2faSecret;
+        return $this;
+    }
+
+    public function is2faEnabled(): bool
+    {
+        return $this->is2faEnabled;
+    }
+
+    public function setIs2faEnabled(bool $is2faEnabled): static
+    {
+        $this->is2faEnabled = $is2faEnabled;
+        return $this;
+    }
+
+    public function getGoogleOAuthId(): ?string
+    {
+        return $this->googleOAuthId;
+    }
+
+    public function setGoogleOAuthId(?string $googleOAuthId): static
+    {
+        $this->googleOAuthId = $googleOAuthId;
+        return $this;
+    }
+
+    public function getOauthProvider(): ?string
+    {
+        return $this->oauthProvider;
+    }
+
+    public function setOauthProvider(?string $oauthProvider): static
+    {
+        $this->oauthProvider = $oauthProvider;
         return $this;
     }
 }

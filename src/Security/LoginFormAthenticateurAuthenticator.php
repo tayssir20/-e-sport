@@ -50,11 +50,20 @@ class LoginFormAthenticateurAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?RedirectResponse
     {
+        $user = $token->getUser();
+
+        // Check if 2FA is enabled for this user
+        if (is_object($user) && $user instanceof User && $user->is2faEnabled()) {
+            // Store user ID in session for 2FA verification
+            $request->getSession()->set('_2fa_user_id', $user->getId());
+            
+            // Redirect to 2FA verification
+            return new RedirectResponse($this->urlGenerator->generate('app_2fa_verify'));
+        }
+
         if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
             return new RedirectResponse($targetPath);
         }
-
-        $user = $token->getUser();
 
         if (is_object($user) && method_exists($user, 'getRoles') && in_array('ROLE_ADMIN', $user->getRoles(), true)) {
             return new RedirectResponse($this->urlGenerator->generate('admin_dashboard'));

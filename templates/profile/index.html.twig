@@ -119,6 +119,23 @@ body {
             Logout
         </a>
 
+        <hr style="border-color: #635bff; margin: 30px 0;">
+
+        {# 2FA Section #}
+        <h4>Two-Factor Authentication</h4>
+        
+        {% if app.user.is2faEnabled() %}
+            <p class="text-success">✅ 2FA is enabled</p>
+            <a href="{{ path('app_2fa_disable') }}" class="btn btn-neon" style="background: linear-gradient(90deg, #dc3545, #c82333);">
+                Disable 2FA
+            </a>
+        {% else %}
+            <p class="text-warning">⚠️ 2FA is not enabled</p>
+            <a href="{{ path('app_2fa_setup') }}" class="btn btn-neon">
+                Enable 2FA
+            </a>
+        {% endif %}
+
     </div>
 </div>
 
