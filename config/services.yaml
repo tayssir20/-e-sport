@@ -12,6 +12,8 @@ services:
     _defaults:
         autowire: true
         autoconfigure: true
+        bind:
+            string $projectDir: '%kernel.project_dir%'
 
     App\:
         resource: '../src/'
@@ -53,36 +55,3 @@ services:
     App\Service\PubgApiService:
         arguments:
             $pubgApiKey: '%pubg_api_key%'
-parameters:
-    teams_directory: '%kernel.project_dir%/public/uploads/teams'
-    google_oauth_client_id: '%env(GOOGLE_OAUTH_CLIENT_ID)%'
-    google_oauth_client_secret: '%env(GOOGLE_OAUTH_CLIENT_SECRET)%'
-    google_oauth_redirect_url: '%env(GOOGLE_OAUTH_REDIRECT_URL)%'
-
-services:
-    # default configuration
-    _defaults:
-        autowire: true
-        autoconfigure: true
-        bind:
-            string $projectDir: '%kernel.project_dir%'
-
-    App\:
-        resource: '../src/'
-
-    App\Controller\PaymentController:
-        arguments:
-            $stripeSecretKey: 'sk_test_51SyCQpLoei8vIeaG2Gs3Zsqdv6RrmlC0ihbhVF45DeiPV38SBYxRqEtBwhu1iGofLC4m9v6aeDzAJvkX5qPWxGM300YCM1X4nq'
-
-    App\Controller\CheckoutController:
-        arguments:
-            $stripePublicKey: 'pk_test_51SyCQpLoei8vIeaGcknMwGDsm4lDM914pWg0XIWdmXO5wpoAQ6RVAiF3GRKQncDU6DBsEsTYu9jCthtLmP4V9Ixk00n8YFO5PY'
-
-    App\Service\GeminiService:
-        arguments:
-            $apiKey: '%env(GROQ_API_KEY)%'
-    App\Security\GoogleOAuthAuthenticator:
-        arguments:
-            $googleClientId: '%google_oauth_client_id%'
-            $googleClientSecret: '%google_oauth_client_secret%'
-            $redirectUrl: '%google_oauth_redirect_url%'
