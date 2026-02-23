@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
+// use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/users')]
 // #[IsGranted('ROLE_ADMIN')]
@@ -129,10 +129,7 @@ class UserController extends AbstractController
     ): Response {
         $currentUser = $this->getUser();
         
-        // Prevent self-deletion
-        // if ($user->getId() === $currentUser->getId()) {
-        //     return $this->redirectToRoute('admin_user_index');
-        // }
+      
 
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->request->get('_token'))) {
             $userEmail = $user->getEmail();
@@ -180,7 +177,7 @@ class UserController extends AbstractController
         return new JsonResponse([
             'success' => true,
             'message' => 'User status updated',
-            'is_active' => true, // Replace with actual value
+            'is_active' => true, 
         ]);
     }
 

@@ -1,0 +1,329 @@
+{% block body %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js"></script>
+
+<style>
+@keyframes fadeUp {
+    from {opacity:0; transform:translateY(40px);}
+    to {opacity:1; transform:translateY(0);}
+}
+
+body {
+    background: linear-gradient(90deg, #b8325b, #0b4fa3);
+    min-height: 100vh;
+}
+
+.main-wrapper {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 50px 20px;
+}
+
+.enroll-box {
+    width: 600px;
+    background: white;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(0,0,0,.3);
+    animation: fadeUp .8s ease;
+}
+
+.right-form {
+    padding: 40px;
+}
+
+h2 {
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+#video-container {
+    position: relative;
+    width: 320px;
+    height: 240px;
+    margin: 0 auto;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+}
+
+#canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: scaleX(-1);
+}
+
+.status-text {
+    text-align: center;
+    margin: 15px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #635bff, #a52bf9);
+    border: none;
+    padding: 12px 30px;
+    width: 100%;
+    margin-top: 15px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(99, 91, 255, .4);
+}
+
+.btn-danger {
+    background: #dc3545;
+    border: none;
+    padding: 12px 30px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.alert {
+    font-size: 13px;
+    animation: fadeUp .6s ease;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+</style>
+
+<div class="main-wrapper">
+    <div class="enroll-box">
+        <div class="right-form">
+            <h2>Face Recognition Setup</h2>
+            
+            {% if isFaceEnabled %}
+                <div class="alert alert-success">
+                    Face recognition is currently enabled for your account.
+                </div>
+            {% endif %}
+
+            <div id="video-container">
+                <video id="video" autoplay muted></video>
+                <canvas id="canvas"></canvas>
+            </div>
+
+            <p class="status-text" id="status">Loading face detection models...</p>
+
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+            
+            <button class="btn btn-primary" id="captureBtn" disabled>
+                Capture Face
+            </button>
+
+            <button class="btn btn-danger" id="disableBtn" {% if not isFaceEnabled %}style="display:none"{% endif %}>
+                Disable Face Recognition
+            </button>
+
+            <a href="{{ path('app_profile') }}" class="d-block text-center mt-3" style="color: #635bff;">
+                Back to Profile
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const VIDEO_WIDTH = 320;
+    const VIDEO_HEIGHT = 240;
+    
+    let modelsLoaded = false;
+    let faceDetected = false;
+
+    async function loadModels() {
+        const statusEl = document.getElementById('status');
+        
+        try {
+            // Load face-api.js models from CDN
+            const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model';
+            
+            await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+            await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+            await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+            
+            modelsLoaded = true;
+            statusEl.textContent = 'Position your face in the camera and click Capture Face';
+            document.getElementById('captureBtn').disabled = false;
+            
+            startVideo();
+        } catch (error) {
+            statusEl.textContent = 'Error loading models: ' + error.message;
+            console.error('Error loading models:', error);
+        }
+    }
+
+    function startVideo() {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        
+        navigator.mediaDevices.getUserMedia({ video: { width: VIDEO_WIDTH, height: VIDEO_HEIGHT } })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                document.getElementById('status').textContent = 'Error accessing camera: ' + err.message;
+            });
+
+        video.addEventListener('play', () => {
+            const displaySize = { width: VIDEO_WIDTH, height: VIDEO_HEIGHT };
+            faceapi.matchDimensions(canvas, displaySize);
+
+            setInterval(async () => {
+                if (!modelsLoaded) return;
+                
+                const detections = await faceapi.detectAllFaces(
+                    video, 
+                    new faceapi.TinyFaceDetectorOptions()
+                ).withFaceLandmarks().withFaceDescriptors();
+
+                const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                
+                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                faceapi.draw.drawDetections(canvas, resizedDetections);
+                
+                faceDetected = detections.length > 0;
+                
+                if (faceDetected) {
+                    document.getElementById('status').textContent = 'Face detected! Click Capture Face to enroll.';
+                    document.getElementById('status').style.color = '#28a745';
+                } else {
+                    document.getElementById('status').textContent = 'Position your face in the camera';
+                    document.getElementById('status').style.color = '#666';
+                }
+            }, 100);
+        });
+    }
+
+    document.getElementById('captureBtn').addEventListener('click', async () => {
+        if (!faceDetected) {
+            alert('Please position your face in the camera first.');
+            return;
+        }
+
+        const video = document.getElementById('video');
+        const statusEl = document.getElementById('status');
+        const captureBtn = document.getElementById('captureBtn');
+        
+        captureBtn.disabled = true;
+        captureBtn.innerHTML = '<span class="loading-spinner"></span>Processing...';
+
+        try {
+            const detection = await faceapi.detectSingleFace(
+                video,
+                new faceapi.TinyFaceDetectorOptions()
+            ).withFaceLandmarks().withFaceDescriptor();
+
+            if (!detection) {
+                throw new Error('No face detected. Please try again.');
+            }
+
+            const descriptor = Array.from(detection.descriptor);
+            
+            // Get CSRF token from the page
+            const csrfToken = document.querySelector('input[name="_csrf_token"]')?.value || '{{ csrf_token("authenticate") }}';
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('face_encoding', JSON.stringify(descriptor));
+            formData.append('_csrf_token', csrfToken);
+            
+            // Send to server
+            const response = await fetch('{{ path("app_face_enroll_submit") }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            // Log response for debugging
+            const responseText = await response.text();
+            console.log('Response status:', response.status);
+            console.log('Response text:', responseText);
+
+            // Check if response is ok
+            if (!response.ok) {
+                throw new Error('Server error: ' + response.status + ' - ' + responseText);
+            }
+
+            const result = JSON.parse(responseText);
+
+            if (result.success) {
+                statusEl.textContent = result.message;
+                statusEl.style.color = '#28a745';
+                alert(result.message);
+                document.getElementById('disableBtn').style.display = 'block';
+            } else {
+                statusEl.textContent = result.message || 'Unknown error';
+                statusEl.style.color = '#dc3545';
+                alert(result.message || 'Failed to enroll face');
+            }
+        } catch (error) {
+            console.error('Error during capture:', error);
+            statusEl.textContent = 'Error: ' + error.message;
+            statusEl.style.color = '#dc3545';
+            alert('Error: ' + error.message);
+        } finally {
+            captureBtn.disabled = false;
+            captureBtn.textContent = 'Capture Face';
+        }
+    });
+
+    document.getElementById('disableBtn').addEventListener('click', async () => {
+        if (!confirm('Are you sure you want to disable face recognition?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('{{ path("app_face_disable") }}', {
+                method: 'POST'
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert(result.message);
+                document.getElementById('disableBtn').style.display = 'none';
+            } else {
+                alert(result.message);
+            }
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    });
+
+    // Load models on page load
+    loadModels();
+</script>
+
+{% endblock %}

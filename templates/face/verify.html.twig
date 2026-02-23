@@ -1,0 +1,326 @@
+{% block body %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+@keyframes fadeUp {
+    from {opacity:0; transform:translateY(40px);}
+    to {opacity:1; transform:translateY(0);}
+}
+
+body{
+    background: linear-gradient(90deg,#b8325b,#0b4fa3);
+}
+
+.main-wrapper{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.verify-box{
+    width:500px;
+    background:white;
+    border-radius:6px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    box-shadow:0 0 30px rgba(0,0,0,.3);
+    animation:fadeUp .8s ease;
+    padding:40px;
+}
+
+h2{
+    font-weight:600;
+    margin-bottom:20px;
+    text-align:center;
+}
+
+#video-container{
+    position:relative;
+    width:320px;
+    height:240px;
+    margin:0 auto;
+    background:#000;
+    border-radius:8px;
+    overflow:hidden;
+}
+
+#video{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transform:scaleX(-1);
+}
+
+#canvas{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    transform:scaleX(-1);
+}
+
+.status-text{
+    text-align:center;
+    margin:15px 0;
+    font-size:14px;
+    color:#666;
+}
+
+.login-btn{
+    background:linear-gradient(90deg,#635bff,#a52bf9);
+    color:white;
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:4px;
+    margin-top:15px;
+    transition:.4s;
+}
+
+.login-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 20px rgba(99,91,255,.4);
+}
+
+.login-btn:disabled{
+    opacity:0.6;
+    cursor:not-allowed;
+    transform:none;
+}
+
+.register-link{
+    text-align:center;
+    margin-top:20px;
+    color:#635bff;
+    display:block;
+    text-decoration:none;
+    transition:.3s;
+}
+
+.register-link:hover{
+    letter-spacing:1px;
+}
+
+.alert{
+    font-size:13px;
+    animation:fadeUp .6s ease;
+}
+
+.loading-spinner {
+    display:inline-block;
+    width:20px;
+    height:20px;
+    border:3px solid rgba(255,255,255,.3);
+    border-radius:50%;
+    border-top-color:#fff;
+    animation:spin 1s ease-in-out infinite;
+    margin-right:10px;
+}
+
+@keyframes spin{
+    to{transform:rotate(360deg);}
+}
+
+.loading-overlay{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.7);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+.loading-overlay.active{
+    display:flex;
+}
+</style>
+
+
+<div class="main-wrapper">
+
+    <div class="verify-box">
+
+        <h2>Face Recognition Login</h2>
+
+        {% if error %}
+            <div class="alert alert-danger">
+                {{ error.messageKey|trans(error.messageData, 'security') }}
+            </div>
+        {% endif %}
+
+        <div id="video-container">
+            <video id="video" autoplay muted></video>
+            <canvas id="canvas"></canvas>
+        </div>
+
+        <p class="status-text" id="status">Loading face detection models...</p>
+
+        <button class="login-btn" id="loginBtn" disabled>
+            <span class="loading-spinner" style="display:none;"></span>
+            <span id="btnText">Login with Face</span>
+        </button>
+
+        <a href="{{ path('app_login') }}" class="register-link">
+            Back to Login
+        </a>
+
+    </div>
+
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div style="text-align:center;color:white;">
+        <div class="loading-spinner"></div>
+        <p>Verifying face...</p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js"></script>
+
+<script>
+    const VIDEO_WIDTH = 320;
+    const VIDEO_HEIGHT = 240;
+    
+    let modelsLoaded = false;
+    let faceDetected = false;
+    let isProcessing = false;
+
+    async function loadModels() {
+        const statusEl = document.getElementById('status');
+        
+        try {
+            const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model';
+            
+            await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+            await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+            await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+            
+            modelsLoaded = true;
+            statusEl.textContent = 'Position your face in the camera';
+            document.getElementById('loginBtn').disabled = false;
+            
+            startVideo();
+        } catch (error) {
+            statusEl.textContent = 'Error loading models: ' + error.message;
+            console.error('Error loading models:', error);
+        }
+    }
+
+    function startVideo() {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        
+        navigator.mediaDevices.getUserMedia({ video: { width: VIDEO_WIDTH, height: VIDEO_HEIGHT } })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                document.getElementById('status').textContent = 'Error accessing camera: ' + err.message;
+            });
+
+        video.addEventListener('play', () => {
+            const displaySize = { width: VIDEO_WIDTH, height: VIDEO_HEIGHT };
+            faceapi.matchDimensions(canvas, displaySize);
+
+            setInterval(async () => {
+                if (!modelsLoaded || isProcessing) return;
+                
+                const detections = await faceapi.detectAllFaces(
+                    video, 
+                    new faceapi.TinyFaceDetectorOptions()
+                ).withFaceLandmarks().withFaceDescriptors();
+
+                const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                
+                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                faceapi.draw.drawDetections(canvas, resizedDetections);
+                
+                faceDetected = detections.length > 0;
+                
+                if (faceDetected) {
+                    document.getElementById('status').textContent = 'Face detected! Click Login to continue.';
+                    document.getElementById('status').style.color = '#28a745';
+                } else {
+                    document.getElementById('status').textContent = 'Position your face in the camera';
+                    document.getElementById('status').style.color = '#666';
+                }
+            }, 100);
+        });
+    }
+
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+        if (!faceDetected || isProcessing) {
+            return;
+        }
+
+        const video = document.getElementById('video');
+        const statusEl = document.getElementById('status');
+        const loginBtn = document.getElementById('loginBtn');
+        const btnText = document.getElementById('btnText');
+        const spinner = loginBtn.querySelector('.loading-spinner');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        
+        isProcessing = true;
+        loginBtn.disabled = true;
+        spinner.style.display = 'inline-block';
+        btnText.textContent = 'Verifying...';
+        loadingOverlay.classList.add('active');
+
+        try {
+            const detection = await faceapi.detectSingleFace(
+                video,
+                new faceapi.TinyFaceDetectorOptions()
+            ).withFaceLandmarks().withFaceDescriptor();
+
+            if (!detection) {
+                throw new Error('No face detected');
+            }
+
+            const descriptor = Array.from(detection.descriptor);
+            
+            // Create form and submit
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ path("app_face_verify") }}';
+            
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_csrf_token';
+            csrfInput.value = '{{ csrf_token("authenticate") }}';
+            
+            const faceEncodingInput = document.createElement('input');
+            faceEncodingInput.type = 'hidden';
+            faceEncodingInput.name = 'face_encoding';
+            faceEncodingInput.value = JSON.stringify(descriptor);
+            
+            form.appendChild(csrfInput);
+            form.appendChild(faceEncodingInput);
+            document.body.appendChild(form);
+            form.submit();
+            
+        } catch (error) {
+            statusEl.textContent = 'Error: ' + error.message;
+            statusEl.style.color = '#dc3545';
+            alert('Face verification failed. Please try again.');
+            
+            isProcessing = false;
+            loginBtn.disabled = false;
+            spinner.style.display = 'none';
+            btnText.textContent = 'Login with Face';
+            loadingOverlay.classList.remove('active');
+        }
+    });
+
+    // Load models on page load
+    loadModels();
+</script>
+
+{% endblock %}

@@ -1,0 +1,155 @@
+{% block body %}
+<style>
+    body {
+        margin: 0;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #c33764, #1d2671);
+        font-family: 'Poppins', sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .reset-wrapper {
+        width: 100%;
+        max-width: 500px;
+        padding: 20px;
+    }
+
+    .reset-card {
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 45px 35px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    }
+
+    h1 {
+        text-align: center;
+        font-size: 26px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #2d3748;
+    }
+
+    .subtitle {
+        text-align: center;
+        font-size: 14px;
+        color: #718096;
+        margin-bottom: 30px;
+    }
+
+    .form-group-modern {
+        position: relative;
+        margin-bottom: 25px;
+    }
+
+    .form-label-modern {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 6px;
+        color: #2d3748;
+    }
+
+    .form-control-modern {
+        width: 100%;
+        padding: 14px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        font-size: 14px;
+        transition: 0.3s;
+    }
+
+    .form-control-modern:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102,126,234,0.15);
+        outline: none;
+    }
+
+    .btn-modern {
+        background: linear-gradient(to right, #667eea, #9f7aea);
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        width: 100%;
+        color: white;
+        transition: 0.3s;
+        margin-top: 10px;
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        opacity: 0.9;
+    }
+
+    .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        font-size: 14px;
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .alert-danger {
+        border-radius: 8px;
+        font-size: 14px;
+        margin-bottom: 15px;
+        padding: 10px;
+    }
+
+    .invalid-feedback {
+        color: #e53e3e;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+</style>
+
+<div class="reset-wrapper">
+    <div class="reset-card">
+
+        <h1>Forgot Your Password?</h1>
+        <p class="subtitle">
+            Enter your email address and we will send you a reset link.
+        </p>
+
+        {% for message in app.flashes('reset_password_error') %}
+            <div class="alert alert-danger">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {{ form_start(requestForm) }}
+
+        <div class="form-group-modern">
+            <label class="form-label-modern">Email Address</label>
+
+            {{ form_widget(requestForm.email, {
+                attr: {
+                    class: 'form-control-modern',
+                    placeholder: 'Enter your email'
+                }
+            }) }}
+
+            {{ form_errors(requestForm.email) }}
+        </div>
+
+        <button type="submit" class="btn-modern">
+            Send Reset Email
+        </button>
+
+        {{ form_end(requestForm) }}
+
+        <a href="{{ path('app_login') }}" class="back-link">
+            Back to login
+        </a>
+
+    </div>
+</div>
+
+{% endblock %}

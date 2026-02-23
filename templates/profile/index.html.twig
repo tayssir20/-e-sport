@@ -136,6 +136,23 @@ body {
             </a>
         {% endif %}
 
+        <hr style="border-color: #635bff; margin: 30px 0;">
+
+        {# Face Recognition Section #}
+        <h4>Face Recognition</h4>
+        
+        {% if app.user.isFaceEnabled() %}
+            <p class="text-success">✅ Face recognition is enabled</p>
+            <a href="{{ path('app_face_enroll') }}" class="btn btn-neon">
+                Update Face
+            </a>
+        {% else %}
+            <p class="text-warning">⚠️ Face recognition is not enabled</p>
+            <a href="{{ path('app_face_enroll') }}" class="btn btn-neon">
+                Enable Face Recognition
+            </a>
+        {% endif %}
+
     </div>
 </div>
 

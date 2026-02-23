@@ -50,6 +50,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'oauth_provider', type: 'string', length: 50, nullable: true)]
     private ?string $oauthProvider = null;
 
+    #[ORM\Column(name: 'face_encoding', type: 'text', nullable: true)]
+    private ?string $faceEncoding = null;
+
+    #[ORM\Column(name: 'is_face_enabled', type: 'boolean')]
+    private bool $isFaceEnabled = false;
+
     public function __construct()
     {
         $this->roles = ['ROLE_USER'];
@@ -163,6 +169,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setOauthProvider(?string $oauthProvider): static
     {
         $this->oauthProvider = $oauthProvider;
+        return $this;
+    }
+
+    public function getFaceEncoding(): ?string
+    {
+        return $this->faceEncoding;
+    }
+
+    public function setFaceEncoding(?string $faceEncoding): static
+    {
+        $this->faceEncoding = $faceEncoding;
+        return $this;
+    }
+
+    public function isFaceEnabled(): bool
+    {
+        return $this->isFaceEnabled;
+    }
+
+    public function setIsFaceEnabled(bool $isFaceEnabled): static
+    {
+        $this->isFaceEnabled = $isFaceEnabled;
         return $this;
     }
 }

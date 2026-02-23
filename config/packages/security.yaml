@@ -23,6 +23,7 @@ security:
             custom_authenticators:
                 - App\Security\GoogleOAuthAuthenticator
                 - App\Security\LoginFormAthenticateurAuthenticator
+                - App\Security\FaceAuthenticator
             logout:
                 path: app_logout
                 # where to redirect after logout
@@ -31,13 +32,20 @@ security:
             # Activate different ways to authenticate:
             # https://symfony.com/doc/current/security.html#the-firewall
 
-            # https://symfony.com/doc/current/security/impersonating_user.html
+            # https://symfony.com/doc/current/security.html#the-switch-user
             # switch_user: true
 
     # Note: Only the *first* matching rule is applied
     access_control:
         - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/reset-password, roles: PUBLIC_ACCESS }
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/face/verify, roles: PUBLIC_ACCESS }
+        - { path: ^/face/check-enabled, roles: PUBLIC_ACCESS }
+        - { path: ^/face/enroll, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/face/enroll/submit, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/face/disable, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
     security:

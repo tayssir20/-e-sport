@@ -158,7 +158,9 @@ h2{
             <a href="{{ path('app_register') }}" class="register-link">
                 Don’t have an account? Register
             </a>
-
+            <a href="{{ path('app_forgot_password_request') }}" class="register-link">
+                Forgot your password?
+            </a>
             <div style="margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
                 <p style="text-align: center; font-size: 13px; color: #666; margin-bottom: 15px;">Or sign in with:</p>
                 <a href="{{ path('app_google_oauth') }}" style="
@@ -186,6 +188,29 @@ h2{
                     </svg>
                     Sign in with Google
                 </a>
+                
+                <a href="{{ path('app_face_verify') }}" id="faceLoginLink" style="
+                    display: none;
+                    align-items: center;
+                    justify-content: center;
+                    width: 100%;
+                    padding: 12px;
+                    margin-top: 10px;
+                    background: linear-gradient(135deg, #635bff 0%, #a52bf9 100%);
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 4px;
+                    font-size: 14px;
+                    font-weight: 500;
+                    transition: all 0.3s ease;
+                " 
+                onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 20px rgba(99,91,255,.4)'"
+                onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'">
+                    <svg style="width: 20px; height: 20px; margin-right: 10px;" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                    </svg>
+                    Sign in with Face Recognition
+                </a>
             </div>
 
     </div>
@@ -193,5 +218,21 @@ h2{
 </div>
 
 </div>
+
+<script>
+    // Check if face login is available
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('{{ path("app_face_check_enabled") }}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.enabled) {
+                    document.getElementById('faceLoginLink').style.display = 'flex';
+                }
+            })
+            .catch(error => {
+                console.log('Face login check failed:', error);
+            });
+    });
+</script>
 
 {% endblock %}

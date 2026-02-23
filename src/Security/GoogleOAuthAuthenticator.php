@@ -113,6 +113,9 @@ class GoogleOAuthAuthenticator extends AbstractAuthenticator implements Authenti
     {
         $user = $token->getUser();
 
+        // Clear any target path to ensure we always go to home after login
+        $request->getSession()->remove('_security.main.target_path');
+
         // Check if user has ROLE_ADMIN
         if (is_object($user) && method_exists($user, 'getRoles') && in_array('ROLE_ADMIN', $user->getRoles(), true)) {
             return new RedirectResponse($this->urlGenerator->generate('admin_dashboard'));

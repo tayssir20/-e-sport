@@ -1,0 +1,134 @@
+{% block body %}
+<style>
+    body {
+        margin: 0;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #c33764, #1d2671);
+        font-family: 'Poppins', sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .reset-wrapper {
+        width: 100%;
+        max-width: 500px;
+        padding: 20px;
+    }
+
+    .reset-card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 45px 35px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        text-align: center;
+    }
+
+    .icon-success {
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 25px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: white;
+        font-weight: bold;
+    }
+
+    h1 {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #2d3748;
+    }
+
+    .description {
+        font-size: 15px;
+        color: #718096;
+        margin-bottom: 30px;
+        line-height: 1.6;
+    }
+
+    .divider {
+        height: 1px;
+        background: #e2e8f0;
+        margin: 25px 0;
+    }
+
+    .secondary-link {
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    .secondary-link a {
+        color: #667eea;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    .secondary-link a:hover {
+        text-decoration: underline;
+    }
+
+    .btn-primary-modern {
+        background: linear-gradient(to right, #667eea, #9f7aea);
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        width: 100%;
+        color: white;
+        transition: 0.3s;
+        margin-top: 30px;
+    }
+
+    .btn-primary-modern:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="reset-wrapper">
+    <div class="reset-card">
+
+        <div class="icon-success">✓</div>
+
+        <h1>Check Your Email</h1>
+
+        <p class="description">
+            If an account exists with the provided email address,
+            a password reset link has been sent.
+            Please check your inbox or spam folder.
+        </p>
+
+        <div class="divider"></div>
+
+        <div class="secondary-link">
+            Didn't receive the email?
+            <a href="{{ path('app_forgot_password_request') }}">
+                Request again
+            </a>
+        </div>
+
+        {% for flash_message in app.flashes('reset_password_error') %}
+            <div style="background: #fed7d7; border: 1px solid #fc8181; border-radius: 8px; padding: 15px; margin-top: 20px; color: #c53030;">
+                {{ flash_message }}
+            </div>
+        {% endfor %}
+
+        {% for flash_message in app.flashes('reset_password_success') %}
+            <div style="background: #c6f6d5; border: 1px solid #68d391; border-radius: 8px; padding: 15px; margin-top: 20px; color: #276749;">
+                {{ flash_message }}
+            </div>
+        {% endfor %}
+
+        <a href="{{ path('app_login') }}" class="btn btn-primary-modern">
+            Back to Login
+        </a>
+
+    </div>
+</div>
+{% endblock %}
