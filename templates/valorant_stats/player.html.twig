@@ -1,0 +1,328 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ account.gameName }}#{{ account.tagLine }} - Valorant Stats{% endblock %}
+
+{% block body %}
+<style>
+    .player-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #0f1923 0%, #1a2332 100%);
+        padding: 40px 20px;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .back-link {
+        display: inline-block;
+        color: #ff4655;
+        text-decoration: none;
+        margin-bottom: 30px;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+    .back-link:hover {
+        color: #fff;
+        transform: translateX(-5px);
+    }
+
+    .player-header {
+        background: linear-gradient(135deg, rgba(255,70,85,0.2), rgba(255,70,85,0.05));
+        border: 2px solid #ff4655;
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 40px;
+        box-shadow: 0 20px 60px rgba(255,70,85,0.3);
+    }
+
+    .player-name {
+        font-size: 3rem;
+        color: #fff;
+        font-weight: 900;
+        margin-bottom: 10px;
+        text-shadow: 0 0 20px #ff465580;
+    }
+
+    .player-tag {
+        color: #ff4655;
+        font-size: 1.5rem;
+    }
+
+    .rank-section {
+        background: rgba(30,41,59,0.6);
+        border: 1px solid rgba(255,70,85,0.3);
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 40px;
+    }
+
+    .rank-title {
+        color: #fff;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .rank-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .rank-card {
+        background: rgba(15,25,35,0.8);
+        border: 1px solid rgba(255,70,85,0.2);
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .rank-label {
+        color: rgba(255,255,255,0.6);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+    }
+
+    .rank-value {
+        color: #ff4655;
+        font-size: 2rem;
+        font-weight: 900;
+    }
+
+    .matches-section {
+        background: rgba(30,41,59,0.6);
+        border: 1px solid rgba(255,70,85,0.3);
+        border-radius: 15px;
+        padding: 30px;
+    }
+
+    .section-title {
+        color: #fff;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .match-card {
+        background: rgba(15,25,35,0.8);
+        border: 1px solid rgba(255,70,85,0.2);
+        border-left: 4px solid #ff4655;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .match-card:hover {
+        background: rgba(15,25,35,0.95);
+        transform: translateX(5px);
+        box-shadow: 0 10px 30px rgba(255,70,85,0.3);
+    }
+
+    .match-card.victory {
+        border-left-color: #10b981;
+    }
+
+    .match-card.defeat {
+        border-left-color: #ef4444;
+    }
+
+    .match-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .match-result {
+        font-size: 1.3rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .match-result.victory {
+        color: #10b981;
+    }
+
+    .match-result.defeat {
+        color: #ef4444;
+    }
+
+    .match-map {
+        color: #ff4655;
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+
+    .match-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 10px;
+        background: rgba(255,70,85,0.1);
+        border-radius: 8px;
+    }
+
+    .stat-label {
+        color: rgba(255,255,255,0.6);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+
+    .stat-value {
+        color: #fff;
+        font-size: 1.3rem;
+        font-weight: 700;
+    }
+
+    .no-data {
+        text-align: center;
+        color: rgba(255,255,255,0.5);
+        padding: 40px;
+        font-size: 1.1rem;
+    }
+
+    @media (max-width: 768px) {
+        .player-name {
+            font-size: 2rem;
+        }
+        
+        .rank-info {
+            grid-template-columns: 1fr;
+        }
+        
+        .match-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+
+<div class="player-page">
+    <div class="container">
+        <a href="{{ path('app_valorant_stats') }}" class="back-link">
+            <i class="fas fa-arrow-left"></i> Nouvelle recherche
+        </a>
+
+        <div class="player-header">
+            <h1 class="player-name">
+                {{ account.gameName }}<span class="player-tag">#{{ account.tagLine }}</span>
+            </h1>
+        </div>
+
+        {% if mmr %}
+        <div class="rank-section">
+            <h2 class="rank-title">
+                <i class="fas fa-trophy"></i> Rang Compétitif
+            </h2>
+            <div class="rank-info">
+                <div class="rank-card">
+                    <div class="rank-label">Rang Actuel</div>
+                    <div class="rank-value">
+                        {% if mmr.currenttier is defined %}
+                            {{ mmr.currenttierpatched ?? 'Unranked' }}
+                        {% else %}
+                            Unranked
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="rank-card">
+                    <div class="rank-label">RR (Ranked Rating)</div>
+                    <div class="rank-value">
+                        {{ mmr.ranking_in_tier ?? 0 }} RR
+                    </div>
+                </div>
+                <div class="rank-card">
+                    <div class="rank-label">Elo</div>
+                    <div class="rank-value">
+                        {{ mmr.elo ?? 0 }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="matches-section">
+            <h2 class="section-title">
+                <i class="fas fa-history"></i> Historique des Matchs
+            </h2>
+
+            {% if matchDetails is not empty %}
+                {% for match in matchDetails %}
+                    {% set playerStats = match.stats %}
+                    {% set isVictory = match.teams.red == 'won' and playerStats.team == 'Red' or match.teams.blue == 'won' and playerStats.team == 'Blue' %}
+                    
+                    <div class="match-card {{ isVictory ? 'victory' : 'defeat' }}">
+                        <div class="match-header">
+                            <span class="match-result {{ isVictory ? 'victory' : 'defeat' }}">
+                                {{ isVictory ? '✓ Victoire' : '✗ Défaite' }}
+                            </span>
+                            <span class="match-map">
+                                <i class="fas fa-map-marked-alt"></i> {{ match.metadata.map ?? 'Unknown' }}
+                            </span>
+                        </div>
+
+                        <div class="match-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">K / D / A</div>
+                                <div class="stat-value">
+                                    {{ playerStats.kills ?? 0 }} / 
+                                    {{ playerStats.deaths ?? 0 }} / 
+                                    {{ playerStats.assists ?? 0 }}
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Agent</div>
+                                <div class="stat-value">{{ playerStats.character ?? 'Unknown' }}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Score</div>
+                                <div class="stat-value">{{ playerStats.score ?? 0 }}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Headshots</div>
+                                <div class="stat-value">
+                                    {% if playerStats.headshots is defined %}
+                                        {{ playerStats.headshots }}%
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Mode</div>
+                                <div class="stat-value">{{ match.metadata.mode ?? 'Unknown' }}</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-data">
+                    <i class="fas fa-inbox"></i><br>
+                    Aucun match récent trouvé
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

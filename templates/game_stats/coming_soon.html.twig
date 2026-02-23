@@ -1,0 +1,293 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ game }} Stats - Bientôt disponible{% endblock %}
+
+{% block body %}
+<style>
+    .coming-soon-hero {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .coming-soon-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 50% 50%, {{ color }}15 0%, transparent 70%);
+        animation: pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 0.5; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    .coming-soon-container {
+        max-width: 800px;
+        text-align: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .game-icon-large {
+        font-size: 8rem;
+        margin-bottom: 30px;
+        animation: float 3s ease-in-out infinite;
+        filter: drop-shadow(0 0 30px {{ color }}80);
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+    }
+
+    .coming-soon-badge {
+        display: inline-block;
+        background: {{ color }}20;
+        border: 2px solid {{ color }};
+        color: {{ color }};
+        padding: 10px 30px;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 30px;
+        animation: glow 2s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+        0%, 100% { box-shadow: 0 0 20px {{ color }}40; }
+        50% { box-shadow: 0 0 40px {{ color }}80; }
+    }
+
+    .game-title {
+        font-size: 4rem;
+        font-weight: 900;
+        color: #fff;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        text-shadow: 0 0 40px {{ color }}80;
+    }
+
+    .game-subtitle {
+        font-size: 1.5rem;
+        color: #94a3b8;
+        margin-bottom: 50px;
+        font-weight: 300;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin: 50px 0;
+    }
+
+    .feature-item {
+        background: rgba(30,41,59,0.6);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-left: 4px solid {{ color }};
+        padding: 20px;
+        border-radius: 10px;
+        text-align: left;
+        transition: all 0.3s ease;
+    }
+
+    .feature-item:hover {
+        background: rgba(30,41,59,0.9);
+        border-left-color: {{ color }};
+        transform: translateX(5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .feature-item::before {
+        content: '✓';
+        display: inline-block;
+        width: 25px;
+        height: 25px;
+        background: {{ color }};
+        color: #fff;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 25px;
+        margin-right: 15px;
+        font-weight: 900;
+    }
+
+    .feature-text {
+        color: #e2e8f0;
+        font-size: 1rem;
+        display: inline;
+    }
+
+    .api-info {
+        background: rgba(30,41,59,0.8);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 15px;
+        padding: 30px;
+        margin: 50px 0;
+    }
+
+    .api-label {
+        color: #64748b;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 10px;
+    }
+
+    .api-name {
+        color: {{ color }};
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .back-button {
+        display: inline-block;
+        background: linear-gradient(135deg, {{ color }}, {{ color }}cc);
+        color: #fff;
+        padding: 15px 40px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 30px;
+    }
+
+    .back-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px {{ color }}60;
+        color: #fff;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 40px 0;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, {{ color }}, {{ color }}80);
+        width: 30%;
+        border-radius: 10px;
+        animation: progress 2s ease-in-out infinite;
+    }
+
+    @keyframes progress {
+        0% { width: 30%; }
+        50% { width: 50%; }
+        100% { width: 30%; }
+    }
+
+    .status-text {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        margin-top: 10px;
+    }
+
+    @media (max-width: 768px) {
+        .game-title {
+            font-size: 2.5rem;
+        }
+        
+        .game-icon-large {
+            font-size: 5rem;
+        }
+        
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="coming-soon-hero">
+    <div class="coming-soon-container">
+        <div class="game-icon-large">{{ icon }}</div>
+        
+        <span class="coming-soon-badge">🚧 En développement</span>
+        
+        <h1 class="game-title">{{ game }}</h1>
+        <p class="game-subtitle">Les statistiques arrivent bientôt!</p>
+
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+        <p class="status-text">Intégration de l'API en cours...</p>
+
+        <div class="api-info">
+            <div class="api-label">API Utilisée</div>
+            <div class="api-name">
+                <i class="fas fa-plug"></i> {{ api }}
+            </div>
+        </div>
+
+        <h3 style="color: #fff; font-size: 1.5rem; margin: 40px 0 20px; font-weight: 700;">
+            📋 Fonctionnalités prévues
+        </h3>
+
+        <div class="features-grid">
+            {% for feature in features %}
+                <div class="feature-item">
+                    <span class="feature-text">{{ feature }}</span>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div style="margin-top: 60px;">
+            <a href="{{ path('app_stats_hub') }}" class="back-button">
+                <i class="fas fa-arrow-left"></i> Retour au Hub
+            </a>
+        </div>
+
+        <div style="margin-top: 40px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.1);">
+            {% if apiConfigured is defined and not apiConfigured %}
+                <div style="background: rgba(239,68,68,0.2); border: 2px solid #ef4444; border-radius: 15px; padding: 30px; margin-bottom: 30px;">
+                    <h3 style="color: #fca5a5; font-size: 1.3rem; margin-bottom: 15px; font-weight: 700;">
+                        🔑 Configuration API Requise
+                    </h3>
+                    <p style="color: #fca5a5; font-size: 1rem; margin-bottom: 20px;">
+                        Pour activer cette fonctionnalité, vous devez configurer une clé API {{ api }}.
+                    </p>
+                    <div style="background: rgba(15,25,35,0.8); border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                        <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 10px;">
+                            <strong style="color: #fff;">Étape 1:</strong> Obtenez votre clé API sur:
+                        </p>
+                        <a href="{{ apiKeyUrl }}" target="_blank" style="color: {{ color }}; text-decoration: none; font-weight: 700; word-break: break-all;">
+                            {{ apiKeyUrl }}
+                        </a>
+                    </div>
+                    <div style="background: rgba(15,25,35,0.8); border-radius: 10px; padding: 20px;">
+                        <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 10px;">
+                            <strong style="color: #fff;">Étape 2:</strong> Ajoutez la clé dans votre fichier <code style="background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; color: {{ color }};">.env</code>
+                        </p>
+                        <pre style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 8px; color: #10b981; font-size: 0.9rem; overflow-x: auto; margin: 10px 0;">{% if game == 'PUBG' %}PUBG_API_KEY=votre-clé-api{% else %}STEAM_API_KEY=votre-clé-api{% endif %}</pre>
+                    </div>
+                </div>
+            {% endif %}
+            <p style="color: #64748b; font-size: 0.9rem;">
+                💡 Cette fonctionnalité sera disponible prochainement.<br>
+                Nous travaillons sur l'intégration de l'API {{ api }}.
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

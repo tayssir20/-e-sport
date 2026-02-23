@@ -1,0 +1,260 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ player.attributes.name }} - PUBG Stats{% endblock %}
+
+{% block body %}
+<style>
+    .player-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        padding: 40px 20px;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .back-link {
+        display: inline-block;
+        color: #f97316;
+        text-decoration: none;
+        margin-bottom: 30px;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+    .back-link:hover {
+        color: #fff;
+        transform: translateX(-5px);
+    }
+
+    .player-header {
+        background: linear-gradient(135deg, rgba(249,115,22,0.2), rgba(249,115,22,0.05));
+        border: 2px solid #f97316;
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 40px;
+        box-shadow: 0 20px 60px rgba(249,115,22,0.3);
+    }
+
+    .player-name {
+        font-size: 3rem;
+        color: #fff;
+        font-weight: 900;
+        margin-bottom: 10px;
+        text-shadow: 0 0 20px #f9731680;
+    }
+
+    .player-platform {
+        color: #f97316;
+        font-size: 1.2rem;
+        text-transform: uppercase;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+
+    .stat-card {
+        background: rgba(30,41,59,0.6);
+        border: 1px solid rgba(249,115,22,0.3);
+        border-radius: 15px;
+        padding: 30px;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        background: rgba(30,41,59,0.8);
+        border-color: #f97316;
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(249,115,22,0.3);
+    }
+
+    .stat-label {
+        color: rgba(255,255,255,0.6);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+    }
+
+    .stat-value {
+        color: #f97316;
+        font-size: 2.5rem;
+        font-weight: 900;
+    }
+
+    .stat-icon {
+        font-size: 2rem;
+        margin-bottom: 15px;
+    }
+
+    .detailed-stats {
+        background: rgba(30,41,59,0.6);
+        border: 1px solid rgba(249,115,22,0.3);
+        border-radius: 15px;
+        padding: 30px;
+    }
+
+    .section-title {
+        color: #fff;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .stats-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .stats-table tr {
+        border-bottom: 1px solid rgba(249,115,22,0.1);
+    }
+
+    .stats-table td {
+        padding: 15px;
+        color: rgba(255,255,255,0.8);
+    }
+
+    .stats-table td:first-child {
+        color: rgba(255,255,255,0.6);
+        font-weight: 600;
+    }
+
+    .stats-table td:last-child {
+        color: #f97316;
+        font-weight: 700;
+        text-align: right;
+    }
+
+    .no-data {
+        text-align: center;
+        color: rgba(255,255,255,0.5);
+        padding: 40px;
+        font-size: 1.1rem;
+    }
+
+    @media (max-width: 768px) {
+        .player-name {
+            font-size: 2rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="player-page">
+    <div class="container">
+        <a href="{{ path('app_pubg_stats') }}" class="back-link">
+            <i class="fas fa-arrow-left"></i> Nouvelle recherche
+        </a>
+
+        <div class="player-header">
+            <h1 class="player-name">{{ player.attributes.name }}</h1>
+            <div class="player-platform">
+                <i class="fas fa-gamepad"></i> {{ platform|upper }}
+            </div>
+        </div>
+
+        {% if rankedStats and rankedStats.data and rankedStats.data.attributes %}
+            {% set stats = rankedStats.data.attributes.rankedGameModeStats %}
+            
+            {% if stats.squad or stats.duo or stats.solo %}
+                <div class="stats-grid">
+                    {% if stats.squad %}
+                        <div class="stat-card">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-label">Squad - Victoires</div>
+                            <div class="stat-value">{{ stats.squad.wins ?? 0 }}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">💀</div>
+                            <div class="stat-label">Squad - K/D</div>
+                            <div class="stat-value">
+                                {% if stats.squad.deaths > 0 %}
+                                    {{ (stats.squad.kills / stats.squad.deaths)|number_format(2) }}
+                                {% else %}
+                                    {{ stats.squad.kills ?? 0 }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if stats.duo %}
+                        <div class="stat-card">
+                            <div class="stat-icon">👬</div>
+                            <div class="stat-label">Duo - Victoires</div>
+                            <div class="stat-value">{{ stats.duo.wins ?? 0 }}</div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if stats.solo %}
+                        <div class="stat-card">
+                            <div class="stat-icon">🧍</div>
+                            <div class="stat-label">Solo - Victoires</div>
+                            <div class="stat-value">{{ stats.solo.wins ?? 0 }}</div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="detailed-stats">
+                    <h2 class="section-title">
+                        <i class="fas fa-chart-bar"></i> Statistiques Détaillées
+                    </h2>
+
+                    {% if stats.squad %}
+                        <h3 style="color: #f97316; margin: 20px 0;">Squad</h3>
+                        <table class="stats-table">
+                            <tr>
+                                <td>Matchs Joués</td>
+                                <td>{{ stats.squad.roundsPlayed ?? 0 }}</td>
+                            </tr>
+                            <tr>
+                                <td>Victoires</td>
+                                <td>{{ stats.squad.wins ?? 0 }}</td>
+                            </tr>
+                            <tr>
+                                <td>Top 10</td>
+                                <td>{{ stats.squad.top10s ?? 0 }}</td>
+                            </tr>
+                            <tr>
+                                <td>Kills</td>
+                                <td>{{ stats.squad.kills ?? 0 }}</td>
+                            </tr>
+                            <tr>
+                                <td>Dégâts Moyens</td>
+                                <td>{{ stats.squad.damageDealt|number_format(0) ?? 0 }}</td>
+                            </tr>
+                        </table>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="detailed-stats">
+                    <div class="no-data">
+                        <i class="fas fa-inbox"></i><br>
+                        Aucune statistique ranked disponible pour ce joueur
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="detailed-stats">
+                <div class="no-data">
+                    <i class="fas fa-inbox"></i><br>
+                    Aucune statistique disponible pour ce joueur
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

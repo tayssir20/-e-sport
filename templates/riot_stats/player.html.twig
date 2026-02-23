@@ -1,0 +1,283 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ playerStats.account.gameName }}#{{ playerStats.account.tagLine }} - Stats{% endblock %}
+
+{% block body %}
+<style>
+    .player-header {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        padding: 60px 0 40px;
+        border-bottom: 2px solid rgba(220,38,38,0.3);
+    }
+
+    .player-info-card {
+        background: rgba(30,41,59,0.8);
+        border: 1px solid rgba(220,38,38,0.2);
+        border-radius: 20px;
+        padding: 30px;
+        backdrop-filter: blur(10px);
+    }
+
+    .player-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 20px;
+        border: 3px solid #dc2626;
+        box-shadow: 0 10px 30px rgba(220,38,38,0.3);
+    }
+
+    .player-name {
+        font-size: 2rem;
+        font-weight: 900;
+        color: #fff;
+        margin: 0;
+    }
+
+    .player-level {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        color: #fff;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: 700;
+        display: inline-block;
+        margin-top: 10px;
+    }
+
+    .rank-card {
+        background: linear-gradient(145deg, rgba(30,41,59,0.9), rgba(15,23,42,0.9));
+        border: 1px solid rgba(220,38,38,0.2);
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .rank-card:hover {
+        transform: translateY(-5px);
+        border-color: #dc2626;
+        box-shadow: 0 15px 35px rgba(220,38,38,0.2);
+    }
+
+    .rank-emblem {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 15px;
+    }
+
+    .rank-tier {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: #fff;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+
+    .rank-lp {
+        color: #94a3b8;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .rank-winrate {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .winrate-bar {
+        height: 8px;
+        background: #1e293b;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+
+    .winrate-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22c55e, #16a34a);
+        transition: width 0.5s ease;
+    }
+
+    .match-card {
+        background: linear-gradient(145deg, rgba(30,41,59,0.8), rgba(15,23,42,0.8));
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .match-card:hover {
+        transform: translateX(5px);
+        border-color: rgba(220,38,38,0.3);
+    }
+
+    .match-win {
+        border-left: 4px solid #22c55e;
+    }
+
+    .match-loss {
+        border-left: 4px solid #ef4444;
+    }
+
+    .match-result {
+        font-weight: 900;
+        font-size: 1.2rem;
+        text-transform: uppercase;
+    }
+
+    .match-win .match-result {
+        color: #22c55e;
+    }
+
+    .match-loss .match-result {
+        color: #ef4444;
+    }
+
+    .champion-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        border: 2px solid rgba(220,38,38,0.3);
+    }
+
+    .kda-stats {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: #fff;
+        margin: 40px 0 25px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .back-search {
+        background: rgba(30,41,59,0.8);
+        border: 1px solid rgba(220,38,38,0.3);
+        color: #fff;
+        padding: 10px 25px;
+        border-radius: 25px;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+
+    .back-search:hover {
+        background: rgba(220,38,38,0.2);
+        border-color: #dc2626;
+        color: #fff;
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="player-header">
+    <div class="container">
+        <a href="{{ path('app_riot_stats') }}" class="back-search">
+            <i class="fas fa-arrow-left"></i> Nouvelle recherche
+        </a>
+        
+        <div class="player-info-card mt-4">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <img src="https://ddragon.leagueoflegends.com/cdn/14.1.1/img/profileicon/{{ playerStats.summoner.profileIconId }}.png" 
+                         alt="Avatar" class="player-avatar">
+                </div>
+                <div class="col">
+                    <h1 class="player-name">
+                        {{ playerStats.account.gameName }}<span style="color: #64748b;">#{{ playerStats.account.tagLine }}</span>
+                    </h1>
+                    <span class="player-level">Niveau {{ playerStats.summoner.summonerLevel }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container" style="padding: 60px 0; background: #0f172a;">
+    <h2 class="section-title">🏆 Classement Ranked</h2>
+    
+    <div class="row g-4">
+        {% if playerStats.leagueEntries is empty %}
+            <div class="col-12">
+                <div class="rank-card">
+                    <p style="color: #64748b; margin: 0;">Aucune donnée de ranked disponible</p>
+                </div>
+            </div>
+        {% else %}
+            {% for entry in playerStats.leagueEntries %}
+                <div class="col-md-6">
+                    <div class="rank-card">
+                        <h3 style="color: #94a3b8; font-size: 1rem; margin-bottom: 15px;">
+                            {{ entry.queueType == 'RANKED_SOLO_5x5' ? 'Solo/Duo' : 'Flex 5v5' }}
+                        </h3>
+                        <div class="rank-tier">{{ entry.tier }} {{ entry.rank }}</div>
+                        <div class="rank-lp">{{ entry.leaguePoints }} LP</div>
+                        
+                        <div class="rank-winrate">
+                            {% set totalGames = entry.wins + entry.losses %}
+                            {% set winrate = totalGames > 0 ? (entry.wins / totalGames * 100)|round : 0 %}
+                            
+                            <div style="color: #fff; font-weight: 700; margin-bottom: 5px;">
+                                {{ entry.wins }}V {{ entry.losses }}D - {{ winrate }}% WR
+                            </div>
+                            <div class="winrate-bar">
+                                <div class="winrate-fill" style="width: {{ winrate }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <h2 class="section-title">📋 Historique des Matchs</h2>
+    
+    {% if matches is empty %}
+        <div class="match-card">
+            <p style="color: #64748b; margin: 0; text-align: center;">Aucun match récent trouvé</p>
+        </div>
+    {% else %}
+        {% for match in matches %}
+            {% set participant = null %}
+            {% for p in match.info.participants %}
+                {% if p.puuid == playerStats.account.puuid %}
+                    {% set participant = p %}
+                {% endif %}
+            {% endfor %}
+            
+            {% if participant %}
+                <div class="match-card {{ participant.win ? 'match-win' : 'match-loss' }}">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/{{ participant.championName }}.png" 
+                                 alt="{{ participant.championName }}" class="champion-icon">
+                        </div>
+                        <div class="col">
+                            <div class="match-result">{{ participant.win ? 'Victoire' : 'Défaite' }}</div>
+                            <div style="color: #94a3b8; font-size: 0.9rem;">
+                                {{ participant.championName }} - {{ match.info.gameMode }}
+                            </div>
+                        </div>
+                        <div class="col-auto text-end">
+                            <div class="kda-stats">
+                                {{ participant.kills }} / {{ participant.deaths }} / {{ participant.assists }}
+                            </div>
+                            <div style="color: #94a3b8; font-size: 0.9rem;">
+                                {% set kda = participant.deaths > 0 ? ((participant.kills + participant.assists) / participant.deaths)|round(2) : 'Perfect' %}
+                                KDA: {{ kda }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+</div>
+
+{% endblock %}

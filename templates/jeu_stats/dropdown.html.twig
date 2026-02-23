@@ -1,0 +1,47 @@
+{# templates/jeu_stats/dropdown.html.twig - Version minimaliste #}
+
+<div class="jeu-stats-dropdown-minimal">
+    {% for stat in statsParJeu %}
+        <a href="{{ path('app_jeu_show', {'id': stat.jeu.id}) }}" class="stat-link-minimal">
+            {{ stat.jeu.nom }}
+        </a>
+    {% else %}
+        <div class="no-stats-minimal">
+            Aucun jeu disponible
+        </div>
+    {% endfor %}
+</div>
+
+<style>
+    .jeu-stats-dropdown-minimal {
+        padding: 0;
+        margin: 0;
+    }
+    
+    .stat-link-minimal {
+        display: block;
+        padding: 10px 20px;
+        color: rgba(255, 255, 255, 0.9);
+        text-decoration: none;
+        transition: all 0.15s ease;
+        font-weight: 600;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .stat-link-minimal:hover {
+        background: linear-gradient(135deg, #ff006e, #8338ec);
+        color: white;
+        transform: translateX(3px);
+    }
+    
+    .stat-link-minimal:last-child {
+        border-bottom: none;
+    }
+    
+    .no-stats-minimal {
+        padding: 20px;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.9em;
+    }
+</style>

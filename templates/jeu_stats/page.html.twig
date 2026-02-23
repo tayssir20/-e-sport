@@ -1,0 +1,562 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques des Jeux{% endblock %}
+
+{% block body %}
+<section class="stats-page-section">
+    <div class="container">
+        <div class="section-header">
+            <h1>Statistiques des Jeux</h1>
+            <p>Analyse détaillée des performances et métriques</p>
+        </div>
+
+        {% if statsParJeu|length > 0 %}
+            <!-- Summary Cards -->
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-icon">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h4>{{ statsParJeu|length }}</h4>
+                        <p>Jeux Actifs</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="summary-content">
+                        {% set totalTournois = 0 %}
+                        {% for stat in statsParJeu %}
+                            {% set totalTournois = totalTournois + stat.nbTournois %}
+                        {% endfor %}
+                        <h4>{{ totalTournois }}</h4>
+                        <p>Tournois Total</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="summary-content">
+                        {% set totalEquipes = 0 %}
+                        {% for stat in statsParJeu %}
+                            {% set totalEquipes = totalEquipes + stat.nbEquipes %}
+                        {% endfor %}
+                        <h4>{{ totalEquipes }}</h4>
+                        <p>Équipes Total</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="summary-content">
+                        {% set totalCagnotte = 0 %}
+                        {% for stat in statsParJeu %}
+                            {% set totalCagnotte = totalCagnotte + stat.cagnotteTotal %}
+                        {% endfor %}
+                        <h4>{{ (totalCagnotte / 1000)|number_format(0) }}K€</h4>
+                        <p>Cagnotte Totale</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                {% for stat in statsParJeu %}
+                    <div class="stat-box">
+                        <div class="stat-box-header">
+                            <h3>{{ stat.jeu.nom }}</h3>
+                            <span class="stat-genre-badge">{{ stat.jeu.genre }}</span>
+                        </div>
+                        <div class="stat-box-body">
+                            <div class="stat-row">
+                                <div class="stat-icon-wrapper trophy">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <span class="stat-label">Tournois</span>
+                                    <span class="stat-value">{{ stat.nbTournois }}</span>
+                                </div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-icon-wrapper team">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <span class="stat-label">Équipes</span>
+                                    <span class="stat-value">{{ stat.nbEquipes }}</span>
+                                </div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-icon-wrapper match">
+                                    <i class="fas fa-gamepad"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <span class="stat-label">Matchs</span>
+                                    <span class="stat-value">{{ stat.nbMatchs|number_format(0, ',', ' ') }}</span>
+                                </div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-icon-wrapper money">
+                                    <i class="fas fa-coins"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <span class="stat-label">Cagnotte totale</span>
+                                    <span class="stat-value">{{ stat.cagnotteTotal|number_format(0, ',', ' ') }}€</span>
+                                </div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-icon-wrapper participation">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <span class="stat-label">Taux de participation</span>
+                                    <span class="stat-value">{{ stat.tauxParticipation }}%</span>
+                                </div>
+                                <div class="progress-bar-wrapper">
+                                    <div class="progress-bar" style="width: {{ stat.tauxParticipation }}%"></div>
+                                </div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-icon-wrapper rating">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <span class="stat-label">Note moyenne</span>
+                                    <span class="stat-value">{{ stat.noteMoyenne }}/5</span>
+                                </div>
+                                <div class="stars-wrapper">
+                                    {% for i in 1..5 %}
+                                        <i class="fas fa-star {% if i <= stat.noteMoyenne %}filled{% endif %}"></i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-box-footer">
+                            <a href="{{ path('app_jeu_show', {'id': stat.jeu.id}) }}" class="btn-view-game">
+                                <span>Voir le jeu</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-stats-message">
+                <div class="no-stats-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <h3>Aucune statistique disponible</h3>
+                <p>Ajoutez des jeux et des tournois pour voir les statistiques</p>
+                <a href="{{ path('app_jeu_index') }}" class="btn-add-game">
+                    <i class="fas fa-plus"></i> Ajouter un jeu
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+    /* ===== STATS PAGE - COMPATIBLE AVEC TEMPLATE PROJET ===== */
+    
+    .stats-page-section {
+        padding: 60px 20px;
+        background: linear-gradient(135deg, #0f0c29, #302b63);
+        min-height: 100vh;
+    }
+    
+    /* Section Header */
+    .section-header {
+        text-align: center;
+        margin-bottom: 50px;
+        color: white;
+    }
+    
+    .section-header h1 {
+        font-size: 3em;
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, #ff006e, #8338ec);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 800;
+    }
+    
+    .section-header p {
+        font-size: 1.2em;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    /* Summary Cards */
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin-bottom: 50px;
+    }
+    
+    .summary-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 30px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: all 0.3s ease;
+        color: white;
+    }
+    
+    .summary-card:hover {
+        transform: translateY(-5px);
+        border-color: #ff006e;
+        background: rgba(255, 0, 110, 0.05);
+        box-shadow: 0 15px 35px rgba(255, 0, 110, 0.2);
+    }
+    
+    .summary-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #ff006e, #8338ec);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 8px 20px rgba(255, 0, 110, 0.3);
+    }
+    
+    .summary-icon i {
+        font-size: 2em;
+        color: white;
+    }
+    
+    .summary-content {
+        flex: 1;
+    }
+    
+    .summary-content h4 {
+        font-size: 2.2em;
+        font-weight: 800;
+        margin: 0 0 5px 0;
+        background: linear-gradient(135deg, #ff006e, #8338ec);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .summary-content p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.95em;
+        font-weight: 600;
+    }
+    
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 30px;
+    }
+    
+    .stat-box {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-box:hover {
+        transform: translateY(-10px);
+        border-color: #ff006e;
+        box-shadow: 0 20px 40px rgba(255, 0, 110, 0.2);
+    }
+    
+    .stat-box-header {
+        background: linear-gradient(135deg, #ff006e, #8338ec);
+        padding: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .stat-box-header h3 {
+        margin: 0;
+        font-size: 1.5em;
+        font-weight: 800;
+        color: white;
+    }
+    
+    .stat-genre-badge {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 8px 18px;
+        border-radius: 25px;
+        font-size: 0.85em;
+        font-weight: 700;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .stat-box-body {
+        padding: 30px;
+    }
+    
+    .stat-row {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        margin-bottom: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        transition: all 0.3s ease;
+        position: relative;
+        color: white;
+    }
+    
+    .stat-row:hover {
+        background: linear-gradient(135deg, #ff006e, #8338ec);
+        transform: translateX(8px);
+        box-shadow: 0 8px 25px rgba(255, 0, 110, 0.3);
+        border-color: transparent;
+    }
+    
+    .stat-row:hover .stat-label,
+    .stat-row:hover .stat-value {
+        color: white;
+    }
+    
+    .stat-row:hover .stat-icon-wrapper {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.1) rotate(5deg);
+    }
+    
+    .stat-row:hover .stat-icon-wrapper i {
+        color: white;
+    }
+    
+    .stat-icon-wrapper {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-icon-wrapper.trophy {
+        background: linear-gradient(135deg, #ffd700, #ffed4e);
+    }
+    
+    .stat-icon-wrapper.team {
+        background: linear-gradient(135deg, #4facfe, #00f2fe);
+    }
+    
+    .stat-icon-wrapper.match {
+        background: linear-gradient(135deg, #f093fb, #f5576c);
+    }
+    
+    .stat-icon-wrapper.money {
+        background: linear-gradient(135deg, #43e97b, #38f9d7);
+    }
+    
+    .stat-icon-wrapper.participation {
+        background: linear-gradient(135deg, #fa709a, #fee140);
+    }
+    
+    .stat-icon-wrapper.rating {
+        background: linear-gradient(135deg, #ff9a56, #ff6a88);
+    }
+    
+    .stat-icon-wrapper i {
+        font-size: 1.4em;
+        color: white;
+    }
+    
+    .stat-content {
+        flex: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .stat-label {
+        font-size: 1em;
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 600;
+    }
+    
+    .stat-value {
+        font-size: 1.2em;
+        font-weight: 800;
+        color: #ff006e;
+    }
+    
+    .progress-bar-wrapper {
+        width: 100%;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 8px;
+    }
+    
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #ff006e, #8338ec);
+        border-radius: 10px;
+        transition: width 1s ease;
+    }
+    
+    .stars-wrapper {
+        display: flex;
+        gap: 4px;
+        margin-top: 5px;
+    }
+    
+    .stars-wrapper i {
+        font-size: 0.9em;
+        color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .stars-wrapper i.filled {
+        color: #ffd700;
+    }
+    
+    .stat-box-footer {
+        padding: 20px 30px;
+        background: rgba(255, 255, 255, 0.03);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        text-align: center;
+    }
+    
+    .btn-view-game {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: linear-gradient(135deg, #ff006e, #8338ec);
+        color: white;
+        padding: 12px 30px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(255, 0, 110, 0.3);
+    }
+    
+    .btn-view-game:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 30px rgba(255, 0, 110, 0.4);
+        color: white;
+    }
+    
+    .btn-view-game i {
+        transition: transform 0.3s ease;
+    }
+    
+    .btn-view-game:hover i {
+        transform: translateX(5px);
+    }
+    
+    /* No Stats Message */
+    .no-stats-message {
+        text-align: center;
+        padding: 80px 40px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        color: white;
+    }
+    
+    .no-stats-icon {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, #ff006e, #8338ec);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 30px;
+        box-shadow: 0 10px 30px rgba(255, 0, 110, 0.3);
+    }
+    
+    .no-stats-icon i {
+        font-size: 3.5em;
+        color: white;
+    }
+    
+    .no-stats-message h3 {
+        color: white;
+        margin-bottom: 15px;
+        font-size: 2em;
+        font-weight: 800;
+    }
+    
+    .no-stats-message p {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1.2em;
+        margin-bottom: 30px;
+    }
+    
+    .btn-add-game {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(135deg, #ff006e, #8338ec);
+        color: white;
+        padding: 14px 32px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(255, 0, 110, 0.3);
+    }
+    
+    .btn-add-game:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 30px rgba(255, 0, 110, 0.4);
+        color: white;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .section-header h1 {
+            font-size: 2em;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+        
+        .summary-cards {
+            grid-template-columns: 1fr;
+        }
+        
+        .stat-box-header h3 {
+            font-size: 1.3em;
+        }
+        
+        .stat-row {
+            padding: 12px;
+        }
+        
+        .stat-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+        }
+    }
+</style>
+{% endblock %}

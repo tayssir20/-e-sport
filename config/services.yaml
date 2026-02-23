@@ -3,6 +3,9 @@ parameters:
     google_oauth_client_id: '%env(GOOGLE_OAUTH_CLIENT_ID)%'
     google_oauth_client_secret: '%env(GOOGLE_OAUTH_CLIENT_SECRET)%'
     google_oauth_redirect_url: '%env(GOOGLE_OAUTH_REDIRECT_URL)%'
+    riot_api_key: '%env(RIOT_API_KEY)%'
+    steam_api_key: '%env(STEAM_API_KEY)%'
+    pubg_api_key: '%env(PUBG_API_KEY)%'
 
 services:
     # default configuration
@@ -24,8 +27,29 @@ services:
     App\Service\GeminiService:
         arguments:
             $apiKey: '%env(GROQ_API_KEY)%'
+
+    App\Service\TournamentAssistantService:
+        arguments:
+            $geminiApiKey: '%env(GROQ_API_KEY)%'
+
     App\Security\GoogleOAuthAuthenticator:
         arguments:
             $googleClientId: '%google_oauth_client_id%'
             $googleClientSecret: '%google_oauth_client_secret%'
             $redirectUrl: '%google_oauth_redirect_url%'
+
+    App\Service\RiotApiService:
+        arguments:
+            $riotApiKey: '%riot_api_key%'
+
+    App\Service\ValorantApiService:
+        arguments:
+            $riotApiKey: '%riot_api_key%'
+
+    App\Service\SteamApiService:
+        arguments:
+            $steamApiKey: '%steam_api_key%'
+
+    App\Service\PubgApiService:
+        arguments:
+            $pubgApiKey: '%pubg_api_key%'

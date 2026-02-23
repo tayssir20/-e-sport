@@ -1,0 +1,159 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}eFootball Stats{% endblock %}
+
+{% block body %}
+<style>
+    .efootball-hero {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #001a4d 0%, #0066cc 100%);
+        padding: 80px 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .search-container {
+        max-width: 600px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 2;
+    }
+
+    .efootball-title {
+        text-align: center;
+        color: #fff;
+        font-size: 4rem;
+        font-weight: 900;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 5px;
+        text-shadow: 0 0 30px #0066cc80;
+    }
+
+    .efootball-subtitle {
+        text-align: center;
+        color: #0066cc;
+        font-size: 1.5rem;
+        margin-bottom: 50px;
+        font-weight: 600;
+    }
+
+    .search-box {
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+        border: 2px solid #0066cc;
+        border-radius: 50px;
+        padding: 30px;
+        box-shadow: 0 20px 60px rgba(0,102,204,0.3);
+    }
+
+    .search-form {
+        display: flex;
+        gap: 15px;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 18px 30px;
+        border: 2px solid rgba(0,102,204,0.3);
+        border-radius: 50px;
+        background: rgba(0,26,77,0.8);
+        color: #fff;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #0066cc;
+        box-shadow: 0 0 20px rgba(0,102,204,0.5);
+    }
+
+    .search-input::placeholder {
+        color: rgba(255,255,255,0.5);
+    }
+
+    .search-button {
+        padding: 18px 40px;
+        background: linear-gradient(135deg, #0066cc, #0052a3);
+        border: none;
+        border-radius: 50px;
+        color: #fff;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .search-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0,102,204,0.6);
+    }
+
+    .info-box {
+        background: rgba(0,102,204,0.1);
+        border: 1px solid #0066cc;
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 30px;
+        text-align: center;
+    }
+
+    .info-text {
+        color: rgba(255,255,255,0.8);
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .alert {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 15px 25px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .alert-error {
+        background: rgba(239,68,68,0.2);
+        border: 1px solid #ef4444;
+        color: #fca5a5;
+    }
+</style>
+
+<div class="efootball-hero">
+    <div class="search-container">
+        <h1 class="efootball-title">🏆 eFootball</h1>
+        <p class="efootball-subtitle">Recherchez vos statistiques</p>
+
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i> {{ message }}
+            </div>
+        {% endfor %}
+
+        <div class="search-box">
+            <form action="{{ path('app_efootball_search') }}" method="POST" class="search-form">
+                <input 
+                    type="text" 
+                    name="steam_id" 
+                    class="search-input" 
+                    placeholder="Steam ID ou vanity URL"
+                    required
+                >
+                <button type="submit" class="search-button">
+                    <i class="fas fa-search"></i> Rechercher
+                </button>
+            </form>
+
+            <div class="info-box">
+                <p class="info-text">
+                    💡 Entrez votre <strong>Steam ID</strong> ou <strong>vanity URL</strong> pour voir vos stats eFootball
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

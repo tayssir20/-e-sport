@@ -1,0 +1,514 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gaming Stats Hub{% endblock %}
+
+{% block body %}
+<style>
+    .stats-hub-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        padding: 100px 0 80px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stats-hub-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1920') center/cover;
+        opacity: 0.05;
+    }
+
+    .stats-title {
+        font-size: 3.5rem;
+        font-weight: 900;
+        color: #fff;
+        text-align: center;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        text-shadow: 0 0 40px rgba(220,38,38,0.5);
+        position: relative;
+        z-index: 2;
+    }
+
+    .stats-subtitle {
+        text-align: center;
+        color: #94a3b8;
+        font-size: 1.2rem;
+        margin-bottom: 60px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .games-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 20px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .game-card {
+        background: linear-gradient(145deg, rgba(30,41,59,0.9), rgba(15,23,42,0.9));
+        border: 2px solid rgba(255,255,255,0.05);
+        border-radius: 20px;
+        padding: 0;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+    }
+
+    .game-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, transparent, var(--game-color), transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .game-card:hover {
+        transform: translateY(-10px);
+        border-color: var(--game-color);
+        box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 40px var(--game-color-alpha);
+    }
+
+    .game-card:hover::before {
+        opacity: 1;
+    }
+
+    .game-card-header {
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(30,41,59,0.5), rgba(15,23,42,0.8));
+    }
+
+    .game-card-header img {
+        max-width: 80%;
+        max-height: 80%;
+        object-fit: contain;
+        position: relative;
+        z-index: 2;
+        filter: drop-shadow(0 10px 30px rgba(0,0,0,0.5));
+        transition: transform 0.3s ease;
+    }
+
+    .game-card:hover .game-card-header img {
+        transform: scale(1.05);
+    }
+
+    .game-card-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 50%;
+        background: linear-gradient(to bottom, transparent 0%, rgba(15,23,42,0.95) 100%);
+        z-index: 1;
+    }
+
+    .game-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(0,0,0,0.7);
+        backdrop-filter: blur(10px);
+        color: #fff;
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        z-index: 2;
+    }
+
+    .game-card-body {
+        padding: 25px;
+    }
+
+    .game-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    .game-title {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: #fff;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .game-description {
+        color: #94a3b8;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    .game-stats {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding-top: 15px;
+        border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .game-stat {
+        flex: 1;
+        text-align: center;
+    }
+
+    .game-stat-value {
+        font-size: 1.2rem;
+        font-weight: 900;
+        color: var(--game-color);
+        display: block;
+    }
+
+    .game-stat-label {
+        font-size: 0.75rem;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .game-button {
+        width: 100%;
+        background: linear-gradient(135deg, var(--game-color), var(--game-color-dark));
+        border: none;
+        color: #fff;
+        padding: 15px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-decoration: none;
+        display: block;
+        text-align: center;
+    }
+
+    .game-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px var(--game-color-alpha);
+        color: #fff;
+    }
+
+    /* Couleurs par jeu */
+    .game-lol {
+        --game-color: #dc2626;
+        --game-color-dark: #991b1b;
+        --game-color-alpha: rgba(220, 38, 38, 0.3);
+    }
+
+    .game-valorant {
+        --game-color: #ff4655;
+        --game-color-dark: #bd3944;
+        --game-color-alpha: rgba(255, 70, 85, 0.3);
+    }
+
+    .game-fifa {
+        --game-color: #00a651;
+        --game-color-dark: #007a3d;
+        --game-color-alpha: rgba(0, 166, 81, 0.3);
+    }
+
+    .game-efootball {
+        --game-color: #0066cc;
+        --game-color-dark: #004d99;
+        --game-color-alpha: rgba(0, 102, 204, 0.3);
+    }
+
+    .game-cs2 {
+        --game-color: #f59e0b;
+        --game-color-dark: #d97706;
+        --game-color-alpha: rgba(245, 158, 11, 0.3);
+    }
+
+    .game-pubg {
+        --game-color: #f97316;
+        --game-color-dark: #ea580c;
+        --game-color-alpha: rgba(249, 115, 22, 0.3);
+    }
+
+    .api-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(255,255,255,0.05);
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 0.7rem;
+        color: #64748b;
+        margin-top: 10px;
+    }
+
+    @media (max-width: 768px) {
+        .stats-title {
+            font-size: 2rem;
+        }
+        
+        .games-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="stats-hub-hero">
+    <div class="container">
+        <h1 class="stats-title">🎮 Gaming Stats Hub</h1>
+        <p class="stats-subtitle">Consultez vos statistiques pour tous vos jeux préférés</p>
+        
+        <div class="games-grid">
+            <!-- League of Legends -->
+            <div class="game-card game-lol">
+                <div class="game-card-header">
+                    <img src="{{ asset('img/games/LOL.png') }}" alt="League of Legends">
+                    <span class="game-badge">Riot Games</span>
+                </div>
+                <div class="game-card-body">
+                    <h3 class="game-title">LOL</h3>
+                    <p class="game-description">
+                        Consultez votre rang, vos stats, et votre historique de matchs LoL
+                    </p>
+                    <div class="game-stats">
+                        <div class="game-stat">
+                            <span class="game-stat-value">Rang</span>
+                            <span class="game-stat-label">Solo/Duo</span>
+                        </div>
+                        <div class="game-stat">
+                            <span class="game-stat-value">K/D/A</span>
+                            <span class="game-stat-label">Stats</span>
+                        </div>
+                        <div class="game-stat">
+                            <span class="game-stat-value">Matchs</span>
+                            <span class="game-stat-label">Historique</span>
+                        </div>
+                    </div>
+                    <a href="{{ path('app_riot_stats') }}" class="game-button">
+                        <i class="fas fa-search"></i> Rechercher
+                    </a>
+                    <div class="api-badge">
+                        <i class="fas fa-plug"></i> API Riot Games
+                    </div>
+                </div>
+            </div>
+
+            <!-- Valorant -->
+            <div class="game-card game-valorant">
+                <div class="game-card-header">
+                    <img src="{{ asset('img/games/Valorant.png') }}" alt="Valorant">
+                    <span class="game-badge">Riot Games</span>
+                </div>
+                <div class="game-card-body">
+                    <h3 class="game-title">Valorant</h3>
+                    <p class="game-description">
+                        Analysez votre rang compétitif et vos performances Valorant
+                    </p>
+                    <div class="game-stats">
+                        <div class="game-stat">
+                            <span class="game-stat-value">Rang</span>
+                            <span class="game-stat-label">Competitive</span>
+                        </div>
+                        <div class="game-stat">
+                            <span class="game-stat-value">K/D</span>
+                            <span class="game-stat-label">Ratio</span>
+                        </div>
+                        <div class="game-stat">
+                            <span class="game-stat-value">RR</span>
+                            <span class="game-stat-label">Points</span>
+                        </div>
+                    </div>
+                    <a href="{{ path('app_valorant_stats') }}" class="game-button">
+                        <i class="fas fa-search"></i> Rechercher
+                    </a>
+                    <div class="api-badge">
+                        <i class="fas fa-plug"></i> API Riot Games
+                    </div>
+                </div>
+            </div>
+
+            <!-- FIFA -->
+            <div class="game-card game-fifa">
+                <div class="game-card-header">
+                    <img src="{{ asset('img/games/fifa.png') }}" alt="FIFA">
+                    <span class="game-badge">EA Sports</span>
+                </div>
+                <div class="game-card-body">
+                    <h3 class="game-title">FIFA</h3>
+                    <p class="game-description">
+                        Suivez vos stats FIFA Ultimate Team et vos performances
+                    </p>
+                    <div class="game-stats">
+                        <div class="game-stat">
+                            <span class="game-stat-value">Division</span>
+                            <span class="game-stat-label">FUT</span>
+                        </div>
+                        <div class="game-stat">
+                            <span class="game-stat-value">W/L</span>
+                            <span class="game-stat-label">Ratio</span>
+                        </div>
+                        <div class="game-stat">
+                            <span class="game-stat-value">Buts</span>
+                            <span class="game-stat-label">Marqués</span>
+                        </div>
+                    </div>
+                    <a href="{{ path('app_fifa_stats') }}" class="game-button">
+                        <i class="fas fa-search"></i> Rechercher
+                    </a>
+                    <div class="api-badge">
+                        <i class="fas fa-plug"></i> API Steam
+                    </div>
+                </div>
+            </div>
+
+            <!-- eFootball -->
+            <div class="game-card game-efootball">
+                <div class="game-card-header">
+                    <img src="{{ asset('img/games/Efootball.png') }}" alt="eFootball">
+                    <span class="game-badge">Konami</span>
+                </div>
+                <div class="game-card-body">
+                    <h3 class="game-title">eFootball</h3>
+                    <p class="game-description">
+                        Consultez vos statistiques et votre progression eFootball
+                    </p>
+                    <div class="game-stats">
+                        <div class="game-stat">
+                            <span class="game-stat-value">Rang</span>
+                            <span class="game-stat-label">Division</span>
+                        </div>
+                        <div class="game-stat">
+                            <span class="game-stat-value">Matchs</span>
+                            <span class="game-stat-label">Joués</span>
+                        </div>
+                        <div class="game-stat">
+                            <span class="game-stat-value">Points</span>
+                            <span class="game-stat-label">GP</span>
+                        </div>
+                    </div>
+                    <a href="{{ path('app_efootball_stats') }}" class="game-button">
+                        <i class="fas fa-search"></i> Rechercher
+                    </a>
+                    <div class="api-badge">
+                        <i class="fas fa-plug"></i> API Steam
+                    </div>
+                </div>
+            </div>
+
+            <!-- CS2 -->
+            <div class="game-card game-cs2">
+                <div class="game-card-header">
+                    <img src="{{ asset('img/games/CS2.png') }}" alt="Counter-Strike 2">
+                    <span class="game-badge">Valve</span>
+                </div>
+                <div class="game-card-body">
+                    <h3 class="game-title">Counter-Strike 2</h3>
+                    <p class="game-description">
+                        Analysez vos stats CS2, votre rang et vos performances
+                    </p>
+                    <div class="game-stats">
+                        <div class="game-stat">
+                            <span class="game-stat-value">Rang</span>
+                            <span class="game-stat-label">Premier</span>
+                        </div>
+                        <div class="game-stat">
+                            <span class="game-stat-value">K/D</span>
+                            <span class="game-stat-label">Ratio</span>
+                        </div>
+                        <div class="game-stat">
+                            <span class="game-stat-value">HS%</span>
+                            <span class="game-stat-label">Headshot</span>
+                        </div>
+                    </div>
+                    <a href="{{ path('app_cs2_stats') }}" class="game-button">
+                        <i class="fas fa-search"></i> Rechercher
+                    </a>
+                    <div class="api-badge">
+                        <i class="fas fa-plug"></i> API Steam
+                    </div>
+                </div>
+            </div>
+
+            <!-- PUBG -->
+            <div class="game-card game-pubg">
+                <div class="game-card-header">
+                    <img src="{{ asset('img/games/pubg.png') }}" alt="PUBG">
+                    <span class="game-badge">PUBG Corp</span>
+                </div>
+                <div class="game-card-body">
+                    <h3 class="game-title">PUBG</h3>
+                    <p class="game-description">
+                        Suivez vos stats PUBG, vos victoires et votre classement
+                    </p>
+                    <div class="game-stats">
+                        <div class="game-stat">
+                            <span class="game-stat-value">Rang</span>
+                            <span class="game-stat-label">Ranked</span>
+                        </div>
+                        <div class="game-stat">
+                            <span class="game-stat-value">Wins</span>
+                            <span class="game-stat-label">Victoires</span>
+                        </div>
+                        <div class="game-stat">
+                            <span class="game-stat-value">K/D</span>
+                            <span class="game-stat-label">Ratio</span>
+                        </div>
+                    </div>
+                    <a href="{{ path('app_pubg_stats') }}" class="game-button">
+                        <i class="fas fa-search"></i> Rechercher
+                    </a>
+                    <div class="api-badge">
+                        <i class="fas fa-plug"></i> API Steam
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section style="padding: 80px 0; background: #0f172a;">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 text-center mb-4">
+                <div style="font-size: 3rem; margin-bottom: 15px;">🎮</div>
+                <h3 style="color: #fff; font-weight: 700; margin-bottom: 10px;">6 Jeux Supportés</h3>
+                <p style="color: #94a3b8;">LoL, Valorant, FIFA, eFootball, CS2, PUBG</p>
+            </div>
+            <div class="col-md-4 text-center mb-4">
+                <div style="font-size: 3rem; margin-bottom: 15px;">📊</div>
+                <h3 style="color: #fff; font-weight: 700; margin-bottom: 10px;">Stats en Temps Réel</h3>
+                <p style="color: #94a3b8;">Données mises à jour automatiquement</p>
+            </div>
+            <div class="col-md-4 text-center mb-4">
+                <div style="font-size: 3rem; margin-bottom: 15px;">🔒</div>
+                <h3 style="color: #fff; font-weight: 700; margin-bottom: 10px;">APIs Officielles</h3>
+                <p style="color: #94a3b8;">Riot Games & Steam</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

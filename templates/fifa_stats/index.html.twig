@@ -1,0 +1,242 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FIFA Stats{% endblock %}
+
+{% block body %}
+<style>
+    .fifa-hero {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #0a3d0a 0%, #00a651 100%);
+        padding: 80px 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .fifa-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50" font-size="50" fill="%2300a65120">⚽</text></svg>') repeat;
+        opacity: 0.1;
+        animation: float 20s linear infinite;
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-100px); }
+    }
+
+    .search-container {
+        max-width: 600px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 2;
+    }
+
+    .fifa-title {
+        text-align: center;
+        color: #fff;
+        font-size: 4rem;
+        font-weight: 900;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 5px;
+        text-shadow: 0 0 30px #00a65180;
+    }
+
+    .fifa-subtitle {
+        text-align: center;
+        color: #00a651;
+        font-size: 1.5rem;
+        margin-bottom: 50px;
+        font-weight: 600;
+    }
+
+    .search-box {
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+        border: 2px solid #00a651;
+        border-radius: 50px;
+        padding: 30px;
+        box-shadow: 0 20px 60px rgba(0,166,81,0.3);
+    }
+
+    .search-form {
+        display: flex;
+        gap: 15px;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 18px 30px;
+        border: 2px solid rgba(0,166,81,0.3);
+        border-radius: 50px;
+        background: rgba(10,61,10,0.8);
+        color: #fff;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #00a651;
+        box-shadow: 0 0 20px rgba(0,166,81,0.5);
+    }
+
+    .search-input::placeholder {
+        color: rgba(255,255,255,0.5);
+    }
+
+    .search-button {
+        padding: 18px 40px;
+        background: linear-gradient(135deg, #00a651, #008a44);
+        border: none;
+        border-radius: 50px;
+        color: #fff;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .search-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0,166,81,0.6);
+    }
+
+    .info-box {
+        background: rgba(0,166,81,0.1);
+        border: 1px solid #00a651;
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 30px;
+        text-align: center;
+    }
+
+    .info-text {
+        color: rgba(255,255,255,0.8);
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 60px;
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .feature-card {
+        background: rgba(255,255,255,0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0,166,81,0.3);
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        background: rgba(0,166,81,0.1);
+        border-color: #00a651;
+        transform: translateY(-5px);
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+    }
+
+    .feature-title {
+        color: #fff;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .feature-desc {
+        color: rgba(255,255,255,0.7);
+        font-size: 0.9rem;
+    }
+
+    .alert {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 15px 25px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .alert-error {
+        background: rgba(239,68,68,0.2);
+        border: 1px solid #ef4444;
+        color: #fca5a5;
+    }
+</style>
+
+<div class="fifa-hero">
+    <div class="search-container">
+        <h1 class="fifa-title">⚽ FIFA</h1>
+        <p class="fifa-subtitle">Recherchez vos statistiques</p>
+
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i> {{ message }}
+            </div>
+        {% endfor %}
+
+        <div class="search-box">
+            <form action="{{ path('app_fifa_search') }}" method="POST" class="search-form">
+                <input 
+                    type="text" 
+                    name="steam_id" 
+                    class="search-input" 
+                    placeholder="Steam ID ou vanity URL"
+                    required
+                >
+                <button type="submit" class="search-button">
+                    <i class="fas fa-search"></i> Rechercher
+                </button>
+            </form>
+
+            <div class="info-box">
+                <p class="info-text">
+                    💡 Entrez votre <strong>Steam ID</strong> ou <strong>vanity URL</strong> pour voir vos stats FIFA
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">⏱️</div>
+            <div class="feature-title">Temps de Jeu</div>
+            <div class="feature-desc">Heures jouées</div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">⚽</div>
+            <div class="feature-title">Buts</div>
+            <div class="feature-desc">Statistiques de buts</div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🏆</div>
+            <div class="feature-title">Victoires</div>
+            <div class="feature-desc">Matchs gagnés</div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <div class="feature-title">Stats Générales</div>
+            <div class="feature-desc">Performances globales</div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

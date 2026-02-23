@@ -1,0 +1,285 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ profile.personaname }} - CS2 Stats{% endblock %}
+
+{% block body %}
+<style>
+    .player-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        padding: 40px 20px;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .back-link {
+        display: inline-block;
+        color: #f59e0b;
+        text-decoration: none;
+        margin-bottom: 30px;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+    .back-link:hover {
+        color: #fff;
+        transform: translateX(-5px);
+    }
+
+    .player-header {
+        background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.05));
+        border: 2px solid #f59e0b;
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 40px;
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        box-shadow: 0 20px 60px rgba(245,158,11,0.3);
+    }
+
+    .player-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 15px;
+        border: 3px solid #f59e0b;
+        box-shadow: 0 10px 30px rgba(245,158,11,0.5);
+    }
+
+    .player-info {
+        flex: 1;
+    }
+
+    .player-name {
+        font-size: 3rem;
+        color: #fff;
+        font-weight: 900;
+        margin-bottom: 10px;
+        text-shadow: 0 0 20px #f59e0b80;
+    }
+
+    .player-status {
+        color: #10b981;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .player-status.offline {
+        color: #6b7280;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+
+    .stat-card {
+        background: rgba(30,41,59,0.6);
+        border: 1px solid rgba(245,158,11,0.3);
+        border-radius: 15px;
+        padding: 30px;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        background: rgba(30,41,59,0.8);
+        border-color: #f59e0b;
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(245,158,11,0.3);
+    }
+
+    .stat-label {
+        color: rgba(255,255,255,0.6);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+    }
+
+    .stat-value {
+        color: #f59e0b;
+        font-size: 2.5rem;
+        font-weight: 900;
+    }
+
+    .stat-icon {
+        font-size: 2rem;
+        margin-bottom: 15px;
+    }
+
+    .detailed-stats {
+        background: rgba(30,41,59,0.6);
+        border: 1px solid rgba(245,158,11,0.3);
+        border-radius: 15px;
+        padding: 30px;
+    }
+
+    .section-title {
+        color: #fff;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .stats-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .stats-table tr {
+        border-bottom: 1px solid rgba(245,158,11,0.1);
+    }
+
+    .stats-table td {
+        padding: 15px;
+        color: rgba(255,255,255,0.8);
+    }
+
+    .stats-table td:first-child {
+        color: rgba(255,255,255,0.6);
+        font-weight: 600;
+    }
+
+    .stats-table td:last-child {
+        color: #f59e0b;
+        font-weight: 700;
+        text-align: right;
+    }
+
+    .no-data {
+        text-align: center;
+        color: rgba(255,255,255,0.5);
+        padding: 40px;
+        font-size: 1.1rem;
+    }
+
+    .warning-box {
+        background: rgba(245,158,11,0.1);
+        border: 1px solid #f59e0b;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .warning-text {
+        color: #f59e0b;
+        font-size: 0.95rem;
+    }
+
+    @media (max-width: 768px) {
+        .player-header {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .player-name {
+            font-size: 2rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="player-page">
+    <div class="container">
+        <a href="{{ path('app_cs2_stats') }}" class="back-link">
+            <i class="fas fa-arrow-left"></i> Nouvelle recherche
+        </a>
+
+        <div class="player-header">
+            <img src="{{ profile.avatarfull }}" alt="{{ profile.personaname }}" class="player-avatar">
+            <div class="player-info">
+                <h1 class="player-name">{{ profile.personaname }}</h1>
+                <div class="player-status {{ profile.personastate == 1 ? '' : 'offline' }}">
+                    <i class="fas fa-circle"></i>
+                    {{ profile.personastate == 1 ? 'En ligne' : 'Hors ligne' }}
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">⏱️</div>
+                <div class="stat-label">Temps de Jeu</div>
+                <div class="stat-value">
+                    {{ (playtime / 60)|round }} h
+                </div>
+            </div>
+
+            {% if stats and stats.playerstats and stats.playerstats.stats %}
+                {% set totalKills = 0 %}
+                {% set totalDeaths = 0 %}
+                {% for stat in stats.playerstats.stats %}
+                    {% if stat.name == 'total_kills' %}
+                        {% set totalKills = stat.value %}
+                    {% endif %}
+                    {% if stat.name == 'total_deaths' %}
+                        {% set totalDeaths = stat.value %}
+                    {% endif %}
+                {% endfor %}
+
+                <div class="stat-card">
+                    <div class="stat-icon">💀</div>
+                    <div class="stat-label">Total Kills</div>
+                    <div class="stat-value">{{ totalKills|number_format(0, ',', ' ') }}</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-label">K/D Ratio</div>
+                    <div class="stat-value">
+                        {% if totalDeaths > 0 %}
+                            {{ (totalKills / totalDeaths)|number_format(2) }}
+                        {% else %}
+                            {{ totalKills }}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if stats and stats.playerstats and stats.playerstats.stats %}
+            <div class="detailed-stats">
+                <h2 class="section-title">
+                    <i class="fas fa-chart-bar"></i> Statistiques Détaillées
+                </h2>
+
+                <table class="stats-table">
+                    {% for stat in stats.playerstats.stats|slice(0, 20) %}
+                        <tr>
+                            <td>{{ stat.name|replace({'_': ' '})|title }}</td>
+                            <td>{{ stat.value|number_format(0, ',', ' ') }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        {% else %}
+            <div class="detailed-stats">
+                <div class="no-data">
+                    <i class="fas fa-lock"></i><br>
+                    Les statistiques de ce joueur sont privées ou indisponibles
+                </div>
+                <div class="warning-box">
+                    <p class="warning-text">
+                        💡 Le joueur doit avoir un profil Steam public pour afficher les statistiques détaillées
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
