@@ -139,7 +139,7 @@ class ResetPasswordController extends AbstractController
         $tokenLifetime = $this->resetPasswordHelper->getTokenLifetime();
         
         $email = (new TemplatedEmail())
-            ->from(new Address('chaabanisarrra@gmail.com', 'E-Sport Manager'))
+            ->from(new Address('rajhiaziz2@gmail.com', 'E-Sport Manager'))
             ->to($user->getEmail())
             ->subject('Your password reset request')
             ->htmlTemplate('reset_password/email.html.twig')
