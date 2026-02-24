@@ -1570,6 +1570,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         namer_keep_extension?: scalar|Param|null, // Default: false
  *         db_driver?: scalar|Param|null, // Default: null
  *     }>,
+ * }
  * @psalm-type SymfonycastsResetPasswordConfig = array{
  *     request_password_repository: scalar|Param|null, // A class that implements ResetPasswordRequestRepositoryInterface - usually your ResetPasswordRequestRepository.
  *     lifetime?: int|Param, // The length of time in seconds that a password reset request is valid for after it is created. // Default: 3600

@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20260223233550 extends AbstractMigration
+final class Version20260224022107 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -39,7 +39,8 @@ final class Version20260223233550 extends AbstractMigration
         $this->addSql('CREATE TABLE rating (id INT AUTO_INCREMENT NOT NULL, value INT NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME DEFAULT NULL, blog_id INT NOT NULL, user_id INT NOT NULL, INDEX IDX_D8892622DAE07E97 (blog_id), INDEX IDX_D8892622A76ED395 (user_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE reset_password_request (id INT AUTO_INCREMENT NOT NULL, selector VARCHAR(20) NOT NULL, hashed_token VARCHAR(100) NOT NULL, requested_at DATETIME NOT NULL, expires_at DATETIME NOT NULL, user_id INT NOT NULL, INDEX IDX_7CE748AA76ED395 (user_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE result (id INT AUTO_INCREMENT NOT NULL, m VARCHAR(255) NOT NULL, PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
-        $this->addSql('CREATE TABLE stream (id INT AUTO_INCREMENT NOT NULL, url VARCHAR(255) NOT NULL, is_active TINYINT NOT NULL, created_at DATETIME NOT NULL, match_game_id INT NOT NULL, INDEX IDX_F0E9BE1C9329866A (match_game_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('CREATE TABLE stream (id INT AUTO_INCREMENT NOT NULL, url VARCHAR(255) NOT NULL, is_active TINYINT NOT NULL, created_at DATETIME NOT NULL, PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('CREATE TABLE stream_reaction (id INT AUTO_INCREMENT NOT NULL, type VARCHAR(50) NOT NULL, comment LONGTEXT DEFAULT NULL, username VARCHAR(255) DEFAULT NULL, created_at DATETIME NOT NULL, stream_id INT DEFAULT NULL, INDEX IDX_8035CDBAD0ED463E (stream_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE tournoi (id INT AUTO_INCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, date_debut DATETIME NOT NULL, date_fin DATETIME NOT NULL, statut VARCHAR(255) NOT NULL, type VARCHAR(255) NOT NULL, max_participants INT DEFAULT NULL, cagnotte DOUBLE PRECISION DEFAULT NULL, date_inscription_limite DATETIME DEFAULT NULL, frais_inscription DOUBLE PRECISION DEFAULT NULL, description LONGTEXT DEFAULT NULL, jeu_id INT DEFAULT NULL, INDEX IDX_18AFD9DF8C9E392E (jeu_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE `user` (id INT AUTO_INCREMENT NOT NULL, email VARCHAR(180) NOT NULL, roles JSON NOT NULL, password VARCHAR(255) NOT NULL, nom VARCHAR(100) NOT NULL, is_active TINYINT NOT NULL, google2fa_secret VARCHAR(255) DEFAULT NULL, is_2fa_enabled TINYINT NOT NULL, google_oauth_id VARCHAR(255) DEFAULT NULL, oauth_provider VARCHAR(50) DEFAULT NULL, face_encoding LONGTEXT DEFAULT NULL, is_face_enabled TINYINT NOT NULL, UNIQUE INDEX UNIQ_8D93D649E7927C74 (email), UNIQUE INDEX UNIQ_8D93D649752251B4 (google_oauth_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE messenger_messages (id BIGINT AUTO_INCREMENT NOT NULL, body LONGTEXT NOT NULL, headers LONGTEXT NOT NULL, queue_name VARCHAR(190) NOT NULL, created_at DATETIME NOT NULL, available_at DATETIME NOT NULL, delivered_at DATETIME DEFAULT NULL, INDEX IDX_75EA56E0FB7336F0E3BD61CE16BA31DBBF396750 (queue_name, available_at, delivered_at, id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
@@ -67,7 +68,7 @@ final class Version20260223233550 extends AbstractMigration
         $this->addSql('ALTER TABLE rating ADD CONSTRAINT FK_D8892622DAE07E97 FOREIGN KEY (blog_id) REFERENCES blog (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE rating ADD CONSTRAINT FK_D8892622A76ED395 FOREIGN KEY (user_id) REFERENCES `user` (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE reset_password_request ADD CONSTRAINT FK_7CE748AA76ED395 FOREIGN KEY (user_id) REFERENCES `user` (id)');
-        $this->addSql('ALTER TABLE stream ADD CONSTRAINT FK_F0E9BE1C9329866A FOREIGN KEY (match_game_id) REFERENCES match_game (id)');
+        $this->addSql('ALTER TABLE stream_reaction ADD CONSTRAINT FK_8035CDBAD0ED463E FOREIGN KEY (stream_id) REFERENCES stream (id)');
         $this->addSql('ALTER TABLE tournoi ADD CONSTRAINT FK_18AFD9DF8C9E392E FOREIGN KEY (jeu_id) REFERENCES jeu (id)');
     }
 
@@ -98,7 +99,7 @@ final class Version20260223233550 extends AbstractMigration
         $this->addSql('ALTER TABLE rating DROP FOREIGN KEY FK_D8892622DAE07E97');
         $this->addSql('ALTER TABLE rating DROP FOREIGN KEY FK_D8892622A76ED395');
         $this->addSql('ALTER TABLE reset_password_request DROP FOREIGN KEY FK_7CE748AA76ED395');
-        $this->addSql('ALTER TABLE stream DROP FOREIGN KEY FK_F0E9BE1C9329866A');
+        $this->addSql('ALTER TABLE stream_reaction DROP FOREIGN KEY FK_8035CDBAD0ED463E');
         $this->addSql('ALTER TABLE tournoi DROP FOREIGN KEY FK_18AFD9DF8C9E392E');
         $this->addSql('DROP TABLE blog');
         $this->addSql('DROP TABLE cart');
@@ -120,6 +121,7 @@ final class Version20260223233550 extends AbstractMigration
         $this->addSql('DROP TABLE reset_password_request');
         $this->addSql('DROP TABLE result');
         $this->addSql('DROP TABLE stream');
+        $this->addSql('DROP TABLE stream_reaction');
         $this->addSql('DROP TABLE tournoi');
         $this->addSql('DROP TABLE `user`');
         $this->addSql('DROP TABLE messenger_messages');

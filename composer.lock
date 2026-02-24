@@ -4,8 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "27011e76dcb8bc438785e5db99bbbd23",
-    "content-hash": "9fcf9f536c885ea28303848baaef38ad",
+    "content-hash": "1aff4bb07adf0172bb7c86ed6ac79c10",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1869,6 +1868,63 @@
             "time": "2025-08-23T21:21:41+00:00"
         },
         {
+            "name": "heroyt/tournament-generator",
+            "version": "v0.5.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Heroyt/tournament-generator.git",
+                "reference": "111c39329fbc4711fd9ba061e96043fc9aeb8950"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Heroyt/tournament-generator/zipball/111c39329fbc4711fd9ba061e96043fc9aeb8950",
+                "reference": "111c39329fbc4711fd9ba061e96043fc9aeb8950",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0"
+            },
+            "require-dev": {
+                "infection/infection": "^0.26",
+                "phpunit/phpunit": "^9.6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "TournamentGenerator\\": "src/TournamentGenerator/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Tomáš Vojík",
+                    "email": "vojik@wboy.cz",
+                    "role": "lead"
+                }
+            ],
+            "description": "A set of classes used to create multiple kinds of tournament brackets in PHP.",
+            "homepage": "https://github.com/Heroyt/tournament-generator",
+            "keywords": [
+                "Teams",
+                "bracket",
+                "generator",
+                "scheduler",
+                "tournament",
+                "tournaments"
+            ],
+            "support": {
+                "docs": "https://heroyt.github.io/tournament-generator/",
+                "email": "vojik@wboy.cz",
+                "issues": "https://github.com/Heroyt/tournament-generator/issues",
+                "source": "https://github.com/Heroyt/tournament-generator",
+                "wiki": "https://tournament-generator.readthedocs.io/en/latest/"
+            },
+            "time": "2023-12-09T13:12:45+00:00"
+        },
+        {
             "name": "jms/metadata",
             "version": "2.9.0",
             "source": {
@@ -1903,30 +1959,6 @@
             "autoload": {
                 "psr-4": {
                     "Metadata\\": "src/"
-            "name": "heroyt/tournament-generator",
-            "version": "v0.5.5",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Heroyt/tournament-generator.git",
-                "reference": "111c39329fbc4711fd9ba061e96043fc9aeb8950"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Heroyt/tournament-generator/zipball/111c39329fbc4711fd9ba061e96043fc9aeb8950",
-                "reference": "111c39329fbc4711fd9ba061e96043fc9aeb8950",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=8.0"
-            },
-            "require-dev": {
-                "infection/infection": "^0.26",
-                "phpunit/phpunit": "^9.6"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "TournamentGenerator\\": "src/TournamentGenerator/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -1955,29 +1987,6 @@
                 "source": "https://github.com/schmittjoh/metadata/tree/2.9.0"
             },
             "time": "2025-11-30T20:12:26+00:00"
-                    "name": "Tomáš Vojík",
-                    "email": "vojik@wboy.cz",
-                    "role": "lead"
-                }
-            ],
-            "description": "A set of classes used to create multiple kinds of tournament brackets in PHP.",
-            "homepage": "https://github.com/Heroyt/tournament-generator",
-            "keywords": [
-                "Teams",
-                "bracket",
-                "generator",
-                "scheduler",
-                "tournament",
-                "tournaments"
-            ],
-            "support": {
-                "docs": "https://heroyt.github.io/tournament-generator/",
-                "email": "vojik@wboy.cz",
-                "issues": "https://github.com/Heroyt/tournament-generator/issues",
-                "source": "https://github.com/Heroyt/tournament-generator",
-                "wiki": "https://tournament-generator.readthedocs.io/en/latest/"
-            },
-            "time": "2023-12-09T13:12:45+00:00"
         },
         {
             "name": "knplabs/knp-components",
@@ -12204,7 +12213,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
@@ -12213,6 +12222,5 @@
         "ext-iconv": "*"
     },
     "platform-dev": {},
-    "platform-dev": [],
     "plugin-api-version": "2.6.0"
 }
