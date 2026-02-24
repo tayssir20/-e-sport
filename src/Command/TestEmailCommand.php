@@ -27,7 +27,7 @@ class TestEmailCommand extends Command
 
         try {
             $email = (new Email())
-                ->from('chaabanisarrra@gmail.com')
+                ->from('rajhiaziz2@gmail.com')
                 ->to('test@example.com')
                 ->subject('Test Email from E-Sport')
                 ->text('This is a test email to verify the mailer configuration.')
@@ -36,7 +36,7 @@ class TestEmailCommand extends Command
             $this->mailer->send($email);
 
             $output->writeln('<fg=green>✓ Test email sent successfully!</fg=green>');
-            $output->writeln('<info>Please check your Mailtrap inbox.</info>');
+            $output->writeln('<info>Please check your inbox.</info>');
 
             return Command::SUCCESS;
         } catch (\Exception $e) {
