@@ -14,7 +14,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Contracts\HttpClient\HttpClientInterface; // Ajouter pour valider reCAPTCHA
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Knp\Component\Pager\PaginatorInterface; // 👈 AJOUT
 
 #[Route('/blog')]
 final class BlogController extends AbstractController
@@ -27,20 +28,50 @@ final class BlogController extends AbstractController
     }
 
     #[Route(name: 'app_blog_index', methods: ['GET'])]
-    public function index(BlogRepository $blogRepository): Response
+    public function index(BlogRepository $blogRepository, Request $request, PaginatorInterface $paginator): Response // 👈 MODIFIÉ
     {
+        $query = $blogRepository->createQueryBuilder('b')
+            ->orderBy('b.createdAt', 'DESC')
+            ->getQuery();
+        
+        $blogs = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            10 // Items per page for admin
+        );
+
         return $this->render('blog/index.html.twig', [
-            'blogs' => $blogRepository->findAll(),
+            'blogs' => $blogs,
         ]);
     }
 
     #[Route('/blogs', name: 'app_blog_user_index', methods: ['GET'])]
-    public function indexUser(Request $request, BlogRepository $blogRepository): Response
+    public function indexUser(Request $request, BlogRepository $blogRepository, PaginatorInterface $paginator): Response // 👈 MODIFIÉ
     {
         $title = $request->query->get('title');
         $date = $request->query->get('date');
 
-        $blogs = $blogRepository->searchByTitleAndDate($title, $date);
+        // Créer une requête pour la pagination
+        $queryBuilder = $blogRepository->createQueryBuilder('b')
+            ->orderBy('b.createdAt', 'DESC');
+        
+        if ($title) {
+            $queryBuilder->andWhere('b.title LIKE :title')
+                ->setParameter('title', '%' . $title . '%');
+        }
+        
+        if ($date) {
+            $queryBuilder->andWhere('b.createdAt LIKE :date')
+                ->setParameter('date', $date . '%');
+        }
+        
+        $query = $queryBuilder->getQuery();
+
+        $blogs = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            5 // Items per page for users
+        );
 
         return $this->render('blog/indexuser.html.twig', [
             'blogs' => $blogs,
@@ -129,7 +160,7 @@ final class BlogController extends AbstractController
         }
 
         // Vérifier le token reCAPTCHA auprès de Google
-        $secretKey = $_ENV['EWZ_RECAPTCHA_SECRET'] ?? '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'; // Clé de test par défaut
+        $secretKey = $_ENV['EWZ_RECAPTCHA_SECRET'] ?? '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe';
         
         try {
             $response = $this->httpClient->request('POST', 'https://www.google.com/recaptcha/api/siteverify', [
@@ -148,7 +179,6 @@ final class BlogController extends AbstractController
                 return $this->redirectToRoute('app_blog_show', ['id' => $blog->getId()]);
             }
             
-            // Score optionnel (pour reCAPTCHA v3)
             if (isset($result['score']) && $result['score'] < 0.5) {
                 $this->addFlash('error', 'Suspicious activity detected. Your comment has been rejected.');
                 return $this->redirectToRoute('app_blog_show', ['id' => $blog->getId()]);
@@ -182,14 +212,12 @@ final class BlogController extends AbstractController
     #[Route('/{id}/rate', name: 'app_blog_rate', methods: ['POST'])]
     public function rate(Request $request, Blog $blog, EntityManagerInterface $em, RatingRepository $ratingRepository): Response
     {
-        // Vérifier si l'utilisateur est connecté
         $user = $this->getUser();
         if (!$user) {
             $this->addFlash('error', 'You must be logged in to rate.');
             return $this->redirectToRoute('app_blog_user_index');
         }
 
-        // Récupérer et valider la note
         $value = (int)$request->request->get('value');
         if ($value < 1 || $value > 5) {
             $this->addFlash('error', 'Invalid rating value. Must be between 1 and 5.');
@@ -197,19 +225,16 @@ final class BlogController extends AbstractController
         }
 
         try {
-            // Vérifier si l'utilisateur a déjà noté ce blog
             $existingRating = $ratingRepository->findOneBy([
                 'blog' => $blog,
                 'user' => $user
             ]);
 
             if ($existingRating) {
-                // Mettre à jour la note existante
                 $existingRating->setValue($value);
                 $existingRating->setUpdatedAt(new \DateTimeImmutable());
                 $message = 'Your rating has been updated successfully!';
             } else {
-                // Créer une nouvelle note
                 $rating = new Rating();
                 $rating->setBlog($blog);
                 $rating->setUser($user);
@@ -225,7 +250,6 @@ final class BlogController extends AbstractController
             $this->addFlash('error', 'An error occurred while saving your rating. Please try again.');
         }
 
-        // Rediriger vers la page principale des blogs
         return $this->redirectToRoute('app_blog_user_index');
     }
 
@@ -234,32 +258,27 @@ final class BlogController extends AbstractController
     #[Route('/api/{id}/rate', name: 'app_blog_api_rate', methods: ['POST'])]
     public function apiRate(Request $request, Blog $blog, EntityManagerInterface $em, RatingRepository $ratingRepository): JsonResponse
     {
-        // Vérifier si l'utilisateur est connecté
         $user = $this->getUser();
         if (!$user) {
             return $this->json(['error' => 'You must be logged in to rate.'], 403);
         }
 
-        // Récupérer et valider la note
         $value = (int)$request->request->get('value');
         if ($value < 1 || $value > 5) {
             return $this->json(['error' => 'Invalid rating value. Must be between 1 and 5.'], 400);
         }
 
         try {
-            // Vérifier si l'utilisateur a déjà noté ce blog
             $existingRating = $ratingRepository->findOneBy([
                 'blog' => $blog,
                 'user' => $user
             ]);
 
             if ($existingRating) {
-                // Mettre à jour la note existante
                 $existingRating->setValue($value);
                 $existingRating->setUpdatedAt(new \DateTimeImmutable());
                 $message = 'Your rating has been updated successfully!';
             } else {
-                // Créer une nouvelle note
                 $rating = new Rating();
                 $rating->setBlog($blog);
                 $rating->setUser($user);
@@ -300,7 +319,6 @@ final class BlogController extends AbstractController
     #[Route('/top-rated', name: 'app_blog_top_rated', methods: ['GET'])]
     public function topRated(BlogRepository $blogRepository): Response
     {
-        // Note: Vous devez ajouter la méthode findTopRated() dans BlogRepository
         $topBlogs = $blogRepository->findTopRated(10);
         
         return $this->render('blog/top_rated.html.twig', [

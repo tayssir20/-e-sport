@@ -1577,6 +1577,11 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     throttle_limit?: int|Param, // Another password reset cannot be made faster than this throttle time in seconds. // Default: 3600
  *     enable_garbage_collection?: bool|Param, // Enable/Disable automatic garbage collection. // Default: true
  * }
+ * @psalm-type OpenaiConfig = array{
+ *     api_key?: scalar|Param|null, // OpenAI API Key used to authenticate with the OpenAI API // Default: "%env(OPENAI_API_KEY)%"
+ *     organization?: scalar|Param|null, // Default: "%env(default::OPENAI_ORGANIZATION)%"
+ *     project?: scalar|Param|null, // OpenAI API project // Default: null
+ *     base_uri?: scalar|Param|null, // OpenAI API base URL used to make requests. Defaults to: api.openai.com/v1 // Default: null
  * @psalm-type DoctrineDoctorConfig = array{
  *     enabled?: bool|Param, // Enable or disable Doctrine Doctor // Default: true
  *     analysis?: array{
@@ -1737,6 +1742,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     knp_paginator?: KnpPaginatorConfig,
  *     vich_uploader?: VichUploaderConfig,
  *     symfonycasts_reset_password?: SymfonycastsResetPasswordConfig,
+ *     openai?: OpenaiConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -1756,6 +1762,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         knp_paginator?: KnpPaginatorConfig,
  *         vich_uploader?: VichUploaderConfig,
  *         symfonycasts_reset_password?: SymfonycastsResetPasswordConfig,
+ *         openai?: OpenaiConfig,
  *         doctrine_doctor?: DoctrineDoctorConfig,
  *     },
  *     "when@prod"?: array{
@@ -1774,6 +1781,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         knp_paginator?: KnpPaginatorConfig,
  *         vich_uploader?: VichUploaderConfig,
  *         symfonycasts_reset_password?: SymfonycastsResetPasswordConfig,
+ *         openai?: OpenaiConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -1792,6 +1800,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         knp_paginator?: KnpPaginatorConfig,
  *         vich_uploader?: VichUploaderConfig,
  *         symfonycasts_reset_password?: SymfonycastsResetPasswordConfig,
+ *         openai?: OpenaiConfig,
  *         doctrine_doctor?: DoctrineDoctorConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
