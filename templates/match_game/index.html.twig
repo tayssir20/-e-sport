@@ -510,4 +510,8 @@ body {
     {% endif %}
 </div>
 
+{% if tournoi is defined and tournoi %}
+  {% include 'components/_chatbot_widget.html.twig' with {'tournoi_id': tournoi.id} %}
+{% endif %}
+
 {% endblock %}

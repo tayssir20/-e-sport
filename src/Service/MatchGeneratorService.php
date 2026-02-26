@@ -10,10 +10,7 @@ use App\Repository\TournoiRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use TournamentGenerator\Tournament;
 
-/**
- * Génère automatiquement les matchs round-robin pour un tournoi
- * dès que le nombre minimum d'équipes inscrites est atteint.
- */
+
 class MatchGeneratorService
 {
     /**
@@ -29,24 +26,17 @@ class MatchGeneratorService
     }
 
     /**
-     * Tente de générer les matchs round-robin pour un tournoi.
-     * Ne génère QUE si :
-     *  - le tournoi existe
-     *  - il y a au moins MIN_EQUIPES inscrites
-     *  - il n'y a pas encore de matchs pour ce tournoi
-     *
+    
      * @return int Le nombre de matchs générés (0 si les conditions ne sont pas remplies)
      */
     public function generateIfReady(Tournoi $tournoi): int
     {
-        // Récupérer les équipes inscrites (fusion inscription_tournoi + ManyToMany)
         $equipes = $this->tournoiRepository->getEquipesInscrites($tournoi);
 
         if (count($equipes) < self::MIN_EQUIPES) {
             return 0;
         }
 
-        // Ne pas régénérer s'il y a déjà des matchs
         $existingMatches = $this->matchGameRepository->findByTournoi($tournoi);
         if (count($existingMatches) > 0) {
             return 0;
@@ -56,7 +46,6 @@ class MatchGeneratorService
     }
 
     /**
-     * Force la régénération des matchs (supprime les anciens + regénère).
      *
      * @return int Le nombre de matchs générés
      */

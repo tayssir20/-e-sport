@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Service\GeminiService;
 use App\Repository\ProductRepository;
+use App\Service\GeminiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,10 +26,7 @@ class ChatbotController extends AbstractController
             return $this->json(['error' => 'Message vide'], 400);
         }
 
-        // Récupérer tous les produits
         $products = $productRepository->findAll();
-
-        // Construire le contexte produits pour l'IA
         $productContext = "Voici les produits disponibles dans notre boutique e-gaming :\n";
         foreach ($products as $p) {
             $productContext .= "- {$p->getName()} | Prix: {$p->getPrice()}€ | Catégorie: {$p->getCategory()->getName()} | Stock: {$p->getStock()} | Description: {$p->getDescription()}\n";
@@ -40,11 +37,9 @@ class ChatbotController extends AbstractController
 
         $history[] = ['role' => 'user', 'text' => $userMessage];
         $history[] = ['role' => 'model', 'text' => $response];
-
         if (count($history) > 20) {
             $history = array_slice($history, -20);
         }
-
         $session->set('chat_history', $history);
 
         return $this->json(['response' => $response]);

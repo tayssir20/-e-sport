@@ -62,6 +62,78 @@
         background: rgba(99, 102, 241, 0.15);
         color: var(--primary);
     }
+
+    .btn-extract {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        border: none;
+        color: #fff;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .btn-extract:hover {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        color: #fff;
+    }
+    .btn-extract:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+    .btn-extract .spinner-border {
+        display: none;
+    }
+    .btn-extract.loading .spinner-border {
+        display: inline-block;
+    }
+    .btn-extract.loading .btn-icon {
+        display: none;
+    }
+
+    .game-select {
+        background: rgba(30, 41, 59, 0.8);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        color: #e2e8f0;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        min-width: 180px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236366f1' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        padding-right: 2rem;
+    }
+    .game-select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    .game-select option {
+        background: #1e293b;
+        color: #e2e8f0;
+    }
+
+    .extract-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(30, 41, 59, 0.5);
+        padding: 0.4rem;
+        border-radius: 10px;
+        border: 1px solid rgba(99, 102, 241, 0.15);
+    }
 </style>
 {% endblock %}
 
@@ -71,10 +143,43 @@
         <div>
             <h1 class="page-title">Teams Management</h1>
         </div>
-        <a href="{{ path('admin_equipe_new') }}" class="btn btn-primary">
-            <i class="fas fa-plus-circle me-2"></i>New Team
-        </a>
+        <div class="d-flex gap-2 align-items-center">
+            {# Sélection du jeu + bouton d'extraction #}
+            <form method="POST" action="{{ path('admin_equipe_extract') }}" class="d-inline" id="extractForm">
+                <input type="hidden" name="_token" value="{{ csrf_token('extract_teams') }}">
+                <div class="extract-group">
+                    <select name="jeu_id" class="game-select" id="gameSelect" required>
+                        <option value="" disabled selected>Choisir un jeu...</option>
+                        {% for jeu in jeux %}
+                            <option value="{{ jeu.id }}">{{ jeu.nom }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn-extract" id="extractBtn">
+                        <span class="btn-icon"><i class="fas fa-cloud-download-alt"></i></span>
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Extraire Équipes
+                    </button>
+                </div>
+            </form>
+            <a href="{{ path('admin_equipe_new') }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i>New Team
+            </a>
+        </div>
     </div>
+
+    {# Flash messages #}
+    {% for type in ['success', 'danger', 'warning', 'info'] %}
+        {% for message in app.flashes(type) %}
+            <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                {% if type == 'success' %}<i class="fas fa-check-circle me-2"></i>
+                {% elseif type == 'danger' %}<i class="fas fa-exclamation-triangle me-2"></i>
+                {% elseif type == 'warning' %}<i class="fas fa-info-circle me-2"></i>
+                {% else %}<i class="fas fa-info-circle me-2"></i>{% endif %}
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
     
     <div class="row mb-4">
         <div class="col-md-4">
@@ -175,4 +280,29 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.getElementById('extractForm');
+    var btn = document.getElementById('extractBtn');
+    var select = document.getElementById('gameSelect');
+    
+    if (form && btn && select) {
+        form.addEventListener('submit', function(e) {
+            if (!select.value) {
+                e.preventDefault();
+                alert('Veuillez sélectionner un jeu.');
+                return false;
+            }
+            // Show loading state AFTER form starts submitting
+            setTimeout(function() {
+                btn.classList.add('loading');
+                btn.disabled = true;
+            }, 50);
+        });
+    }
+});
+</script>
 {% endblock %}

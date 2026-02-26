@@ -52,10 +52,10 @@ final class HomeController extends AbstractController
             $s2 = $m->getScoreTeam2() ?? 0;
 
             if (!isset($stats[$id1])) {
-                $stats[$id1] = ['equipe' => $eq1, 'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0, 'bp' => 0, 'bc' => 0];
+                $stats[$id1] = ['equipe' => $eq1, 'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0, 'bp' => 0, 'bc' => 0, 'pts' => 0, 'diff' => 0, 'ppm' => 0.0, 'badge' => 'Beginner'];
             }
             if (!isset($stats[$id2])) {
-                $stats[$id2] = ['equipe' => $eq2, 'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0, 'bp' => 0, 'bc' => 0];
+                $stats[$id2] = ['equipe' => $eq2, 'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0, 'bp' => 0, 'bc' => 0, 'pts' => 0, 'diff' => 0, 'ppm' => 0.0, 'badge' => 'Beginner'];
             }
 
             $stats[$id1]['mj']++;

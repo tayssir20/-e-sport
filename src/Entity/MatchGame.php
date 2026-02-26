@@ -41,15 +41,15 @@ class MatchGame
     private ?string $statut = null;
 
     // 🔥 relation avec Tournoi
-    #[ORM\ManyToOne(targetEntity: Tournoi::class)]
+    #[ORM\ManyToOne(targetEntity: Tournoi::class, inversedBy: 'matchGames')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull(message: 'Veuillez sélectionner un tournoi.')]
-    private ?Tournoi $Tournoi = null;
+    private ?Tournoi $tournoi = null;
 
     /**
      * @var Collection<int, Stream>
      */
-    #[ORM\OneToMany(targetEntity: Stream::class, mappedBy: 'matchGame')]
+    #[ORM\OneToMany(targetEntity: Stream::class, mappedBy: 'matchGame', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $streams;
 public function __construct()
     {
@@ -132,12 +132,12 @@ public function __construct()
 
     public function getTournoi(): ?Tournoi
     {
-        return $this->Tournoi;
+        return $this->tournoi;
     }
 
     public function setTournoi(?Tournoi $Tournoi): self
     {
-        $this->Tournoi = $Tournoi;
+        $this->tournoi = $Tournoi;
         return $this;
     }
     

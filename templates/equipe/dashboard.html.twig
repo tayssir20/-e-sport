@@ -1,6 +1,8 @@
 {% extends 'base.html.twig' %}
 {% block title %}Team Dashboard{% endblock %}
 
+{% block importmap %}{{ importmap('app') }}{% endblock %}
+
 {% block body %}
 <div class="team-dashboard">
 
@@ -187,5 +189,8 @@
     </section>
 
 </div>
+
+{% include 'components/_chatbot_widget.html.twig' with {'equipe_id': team.id} %}
+
 {% endblock %}
 

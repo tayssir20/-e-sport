@@ -1,0 +1,210 @@
+{#
+  Chatbot widget contextuel — Usage :
+    {% include 'components/_chatbot_widget.html.twig' with {'equipe_id': equipe.id} %}
+    {% include 'components/_chatbot_widget.html.twig' with {'tournoi_id': tournoi.id} %}
+#}
+
+{# Détermine l'URL de l'endpoint en fonction du contexte #}
+{% if equipe_id is defined %}
+    {% set chat_url = path('chatbot_equipe', {id: equipe_id}) %}
+    {% set chat_title = '🤖 Assistant Équipe' %}
+    {% set chat_placeholder = 'Demande des stats, le win rate...' %}
+    {% set chat_color = '#6f42c1' %}
+{% elseif tournoi_id is defined %}
+    {% set chat_url = path('chatbot_tournoi', {tournoiId: tournoi_id}) %}
+    {% set chat_title = '🤖 Assistant Tournoi' %}
+    {% set chat_placeholder = 'Classement, pronostics, stats...' %}
+    {% set chat_color = '#0d6efd' %}
+{% else %}
+    {% set chat_url = path('chatbot_message') %}
+    {% set chat_title = '🤖 Assistant Gaming' %}
+    {% set chat_placeholder = 'Posez votre question...' %}
+    {% set chat_color = '#198754' %}
+{% endif %}
+
+<style>
+  .ai-chatbot-fab {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+  }
+  .ai-chatbot-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    background: {{ chat_color }};
+    color: #fff;
+    font-size: 26px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0,0,0,.35);
+    transition: transform .15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ai-chatbot-btn:hover { transform: scale(1.1); }
+  .ai-chatbot-box {
+    width: 340px;
+    max-height: 480px;
+    background: #1a1d2e;
+    border: 1px solid {{ chat_color }};
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    display: none;
+  }
+  .ai-chatbot-header {
+    background: {{ chat_color }};
+    padding: 10px 14px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .ai-chatbot-header span { opacity: .8; cursor: pointer; font-size: 18px; }
+  .ai-chatbot-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 330px;
+    scroll-behavior: smooth;
+  }
+  .ai-chatbot-messages::-webkit-scrollbar { width: 4px; }
+  .ai-chatbot-messages::-webkit-scrollbar-thumb { background: {{ chat_color }}; border-radius: 4px; }
+  .ai-msg {
+    max-width: 88%;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.45;
+    word-break: break-word;
+  }
+  .ai-msg.user {
+    background: {{ chat_color }};
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+  .ai-msg.bot {
+    background: #2a2d3e;
+    color: #d0d4f0;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+  }
+  .ai-msg.typing { opacity: .6; font-style: italic; }
+  .ai-chatbot-footer {
+    display: flex;
+    gap: 6px;
+    padding: 10px;
+    border-top: 1px solid #2a2d3e;
+    flex-shrink: 0;
+  }
+  .ai-chatbot-input {
+    flex: 1;
+    background: #2a2d3e;
+    border: 1px solid #3a3d4e;
+    color: #d0d4f0;
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 13px;
+    outline: none;
+  }
+  .ai-chatbot-input:focus { border-color: {{ chat_color }}; }
+  .ai-chatbot-send {
+    background: {{ chat_color }};
+    border: none;
+    color: #fff;
+    border-radius: 8px;
+    padding: 0 14px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .ai-chatbot-send:disabled { opacity: .5; cursor: default; }
+</style>
+
+<div class="ai-chatbot-fab" id="aiChatFab">
+  <div class="ai-chatbot-box" id="aiChatBox">
+    <div class="ai-chatbot-header">
+      <span>{{ chat_title }}</span>
+      <span onclick="document.getElementById('aiChatBox').style.display='none'" title="Fermer">✕</span>
+    </div>
+    <div class="ai-chatbot-messages" id="aiChatMessages">
+      <div class="ai-msg bot">Bonjour 👋 Je suis ton assistant e-sport. Comment puis-je t'aider ?</div>
+    </div>
+    <div class="ai-chatbot-footer">
+      <input class="ai-chatbot-input" id="aiChatInput" type="text"
+             placeholder="{{ chat_placeholder }}"
+             maxlength="400" autocomplete="off">
+      <button class="ai-chatbot-send" id="aiChatSend" title="Envoyer">➤</button>
+    </div>
+  </div>
+
+  <button class="ai-chatbot-btn" id="aiChatToggle" title="{{ chat_title }}">🤖</button>
+</div>
+
+<script>
+(function () {
+  const CHAT_URL = {{ chat_url | json_encode | raw }};
+  const box     = document.getElementById('aiChatBox');
+  const msgs    = document.getElementById('aiChatMessages');
+  const input   = document.getElementById('aiChatInput');
+  const sendBtn = document.getElementById('aiChatSend');
+  const toggle  = document.getElementById('aiChatToggle');
+
+  toggle.addEventListener('click', () => {
+    const isVisible = box.style.display === 'flex';
+    box.style.display = isVisible ? 'none' : 'flex';
+    if (!isVisible) input.focus();
+  });
+
+  function addMsg(text, role) {
+    const d = document.createElement('div');
+    d.className = 'ai-msg ' + role;
+    d.textContent = text;
+    msgs.appendChild(d);
+    msgs.scrollTop = msgs.scrollHeight;
+    return d;
+  }
+
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    sendBtn.disabled = true;
+    addMsg(text, 'user');
+    const thinking = addMsg('…', 'bot typing');
+    try {
+      const res = await fetch(CHAT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        body: JSON.stringify({ message: text })
+      });
+      const json = await res.json();
+      thinking.textContent = json.response ?? json.error ?? 'Erreur inconnue';
+      thinking.classList.remove('typing');
+    } catch (e) {
+      thinking.textContent = 'Erreur de connexion.';
+      thinking.classList.remove('typing');
+    }
+    sendBtn.disabled = false;
+    input.focus();
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+})();
+</script>

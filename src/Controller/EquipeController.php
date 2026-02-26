@@ -20,6 +20,11 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\Notifier\NotifierInterface;
+use Symfony\Component\Notifier\Recipient\Recipient;
+use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
+use Symfony\UX\Chartjs\Model\Chart;
+use App\Notification\JoinRequestNotification;
 
 #[Route('/equipe')]
 #[IsGranted('ROLE_USER')]
@@ -58,7 +63,7 @@ final class EquipeController extends AbstractController
     {
         $equipe = new Equipe();
         $user = $this->getUser();
-        if ($user) {
+        if ($user instanceof User) {
             $equipe->setOwner($user);
             $equipe->addMember($user);
         }
@@ -221,9 +226,7 @@ final class EquipeController extends AbstractController
                     if ($equipe->getMembers()->count() < $equipe->getMaxMembers()) {
                         $equipe->addMember($user);
                         $entityManager->flush();
-                    } else {
-                        $this->addFlash('error', 'Impossible d\'ajouter : l\'équipe est pleine.');
-                    }
+                    } 
                 }
             }
     
@@ -334,7 +337,7 @@ final class EquipeController extends AbstractController
     }
     
     #[Route('/{id<\d+>}/dashboard', name: 'app_equipe_dashboard', methods: ['GET'])]
-    public function dashboard(int $id, EntityManagerInterface $entityManager): Response
+    public function dashboard(int $id, EntityManagerInterface $entityManager, ChartBuilderInterface $chartBuilder): Response
     {
         $equipe = $entityManager->getRepository(Equipe::class)->find($id);
 
@@ -406,6 +409,51 @@ final class EquipeController extends AbstractController
             }
         }
 
+        // --- CHARTS ---
+        $losses = 0;
+        $draws = 0;
+        foreach ($matches as $match) {
+            $s1 = $match->getScoreTeam1() ?? 0;
+            $s2 = $match->getScoreTeam2() ?? 0;
+            if ($match->getEquipe1() === $equipe) {
+                if ($s1 < $s2) { $losses++; } elseif ($s1 === $s2) { $draws++; }
+            } elseif ($match->getEquipe2() === $equipe) {
+                if ($s2 < $s1) { $losses++; } elseif ($s1 === $s2) { $draws++; }
+            }
+        }
+
+        // Results Chart (Doughnut: Wins / Losses / Draws)
+        $resultsChart = $chartBuilder->createChart(Chart::TYPE_DOUGHNUT);
+        $resultsChart->setData([
+            'labels' => ['Wins', 'Losses', 'Draws'],
+            'datasets' => [[
+                'data' => [$wins, $losses, $draws],
+                'backgroundColor' => ['#22c55e', '#ef4444', '#6b7280'],
+            ]],
+        ]);
+        $resultsChart->setOptions([
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'plugins' => ['legend' => ['labels' => ['color' => '#fff']]],
+        ]);
+
+        // Goals Chart (Bar: Goals For vs Goals Against)
+        $goalsChart = $chartBuilder->createChart(Chart::TYPE_BAR);
+        $goalsChart->setData([
+            'labels' => ['Goals For', 'Goals Against'],
+            'datasets' => [[
+                'label' => 'Goals',
+                'data' => [$goalsFor, $goalsAgainst],
+                'backgroundColor' => ['#3b82f6', '#ef4444'],
+            ]],
+        ]);
+        $goalsChart->setOptions([
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'scales' => ['y' => ['ticks' => ['color' => '#fff'], 'grid' => ['color' => 'rgba(255,255,255,0.1)']], 'x' => ['ticks' => ['color' => '#fff'], 'grid' => ['color' => 'rgba(255,255,255,0.1)']]],
+            'plugins' => ['legend' => ['labels' => ['color' => '#fff']]],
+        ]);
+
         // Pending join requests (for owner)
         $pendingRequests = [];
         if ($membership['role'] === 'LEADER') {
@@ -427,18 +475,20 @@ final class EquipeController extends AbstractController
             'goalDifference' => $goalDifference,
             'teamRank' => $teamRank,
             'pendingRequests' => $pendingRequests,
+            'resultsChart' => $resultsChart,
+            'goalsChart' => $goalsChart,
         ]);
     }
 
     #[Route('/{id<\d+>}/join', name: 'app_equipe_join', methods: ['GET', 'POST'])]
-    public function join(int $id, EntityManagerInterface $entityManager): Response
+    public function join(int $id, EntityManagerInterface $entityManager, NotifierInterface $notifier): Response
     {
         $equipe = $entityManager->getRepository(Equipe::class)->find($id);
         if (!$equipe) {
             return $this->redirectToRoute('app_equipe_index');
         }
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -449,7 +499,6 @@ final class EquipeController extends AbstractController
 
         // Team is full
         if ($equipe->getMembers()->count() >= $equipe->getMaxMembers()) {
-            $this->addFlash('error', 'L\'équipe est pleine.');
             return $this->redirectToRoute('app_equipe_discover');
         }
 
@@ -461,7 +510,6 @@ final class EquipeController extends AbstractController
         ]);
 
         if ($existingRequest) {
-            $this->addFlash('info', 'Vous avez déjà une demande en attente pour cette équipe.');
             return $this->redirectToRoute('app_equipe_discover');
         }
 
@@ -474,7 +522,21 @@ final class EquipeController extends AbstractController
         $entityManager->persist($joinRequest);
         $entityManager->flush();
 
-        $this->addFlash('success', 'Votre demande a été envoyée ! En attente de l\'approbation du propriétaire.');
+        // Envoyer la notification email au owner de l'équipe
+        $owner = $equipe->getOwner();
+        if ($owner && $owner->getEmail()) {
+            try {
+                $notification = new JoinRequestNotification(
+                    $user->getNom() ?? $user->getEmail(),
+                    $equipe->getNom(),
+                    $this->getParameter('kernel.project_dir')
+                );
+                $notifier->send($notification, new Recipient($owner->getEmail()));
+            } catch (\Exception $e) {
+                // Ne pas bloquer si l'email échoue
+            }
+        }
+
         return $this->redirectToRoute('app_equipe_discover');
     }
 
@@ -493,21 +555,17 @@ final class EquipeController extends AbstractController
 
         $joinRequest = $entityManager->getRepository(JoinRequest::class)->find($requestId);
         if (!$joinRequest || $joinRequest->getEquipe() !== $equipe || $joinRequest->getStatus() !== 'pending') {
-            $this->addFlash('error', 'Demande introuvable ou déjà traitée.');
             return $this->redirectToRoute('app_equipe_dashboard', ['id' => $id]);
         }
 
         if ($action === 'accept') {
             if ($equipe->getMembers()->count() >= $equipe->getMaxMembers()) {
-                $this->addFlash('error', 'Impossible d\'accepter : l\'équipe est pleine.');
             } else {
                 $equipe->addMember($joinRequest->getUser());
                 $joinRequest->setStatus('accepted');
-                $this->addFlash('success', $joinRequest->getUser()->getNom() . ' a été ajouté à l\'équipe !');
             }
         } elseif ($action === 'reject') {
             $joinRequest->setStatus('rejected');
-            $this->addFlash('info', 'Demande refusée.');
         }
 
         $entityManager->flush();
@@ -523,7 +581,7 @@ final class EquipeController extends AbstractController
             return $this->redirectToRoute('app_equipe_index');
         }
         $user = $this->getUser();
-        if ($equipe->getMembers()->contains($user)) {
+        if ($equipe->getMembers()->contains($user) && $user instanceof User) {
             $equipe->removeMember($user);
             $entityManager->flush();
         }
@@ -601,10 +659,10 @@ final class EquipeController extends AbstractController
             $s2 = $m->getScoreTeam2() ?? 0;
 
             if (!isset($stats[$id1])) {
-                $stats[$id1] = ['equipe' => $eq1, 'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0, 'bp' => 0, 'bc' => 0];
+                $stats[$id1] = ['equipe' => $eq1, 'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0, 'bp' => 0, 'bc' => 0, 'pts' => 0, 'diff' => 0, 'ppm' => 0.0, 'badge' => 'Beginner'];
             }
             if (!isset($stats[$id2])) {
-                $stats[$id2] = ['equipe' => $eq2, 'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0, 'bp' => 0, 'bc' => 0];
+                $stats[$id2] = ['equipe' => $eq2, 'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0, 'bp' => 0, 'bc' => 0, 'pts' => 0, 'diff' => 0, 'ppm' => 0.0, 'badge' => 'Beginner'];
             }
 
             $stats[$id1]['mj']++;

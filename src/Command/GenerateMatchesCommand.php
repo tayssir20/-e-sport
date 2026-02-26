@@ -10,17 +10,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-/**
- * Commande planifiée qui génère automatiquement les matchs round-robin
- * pour tous les tournois dont la date d'inscription limite est dépassée
- * et qui n'ont pas encore de matchs générés.
- *
- * Usage :
- *   php bin/console app:generate-matches
- *
- * À exécuter via un cron job (par ex. toutes les heures) :
- *   0 * * * * php /chemin/vers/bin/console app:generate-matches
- */
+
 #[AsCommand(
     name: 'app:generate-matches',
     description: 'Génère les matchs pour les tournois dont la date limite d\'inscription est passée.',

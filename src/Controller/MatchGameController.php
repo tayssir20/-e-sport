@@ -42,7 +42,7 @@ final class MatchGameController extends AbstractController
         $stats = [];
         foreach ($equipesInscrites as $equipe) {
             $id = $equipe->getId();
-            $stats[$id] = ['equipe' => $equipe, 'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0, 'bp' => 0, 'bc' => 0];
+            $stats[$id] = ['equipe' => $equipe, 'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0, 'bp' => 0, 'bc' => 0, 'pts' => 0, 'diff' => 0];
         }
         foreach ($matchGames as $m) {
             if (strtolower((string) $m->getStatut()) !== 'finished') {
@@ -56,10 +56,10 @@ final class MatchGameController extends AbstractController
             $id1 = $eq1->getId();
             $id2 = $eq2->getId();
             if (!isset($stats[$id1])) {
-                $stats[$id1] = ['equipe' => $eq1, 'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0, 'bp' => 0, 'bc' => 0];
+                $stats[$id1] = ['equipe' => $eq1, 'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0, 'bp' => 0, 'bc' => 0, 'pts' => 0, 'diff' => 0];
             }
             if (!isset($stats[$id2])) {
-                $stats[$id2] = ['equipe' => $eq2, 'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0, 'bp' => 0, 'bc' => 0];
+                $stats[$id2] = ['equipe' => $eq2, 'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0, 'bp' => 0, 'bc' => 0, 'pts' => 0, 'diff' => 0];
             }
             $s1 = $m->getScoreTeam1() ?? 0;
             $s2 = $m->getScoreTeam2() ?? 0;
@@ -133,9 +133,7 @@ final class MatchGameController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
 
             if (!$matchGame->getEquipe1() || !$matchGame->getEquipe2()) {
-                $this->addFlash('error', 'Veuillez sélectionner les deux équipes.');
             } elseif (!$matchGame->getTournoi()) {
-                $this->addFlash('error', 'Match doit appartenir à un tournoi');
             } else {
                 $entityManager->persist($matchGame);
                 $entityManager->flush();
@@ -166,9 +164,7 @@ final class MatchGameController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
 
             if (!$matchGame->getEquipe1() || !$matchGame->getEquipe2()) {
-                $this->addFlash('error', 'Veuillez sélectionner les deux équipes.');
             } elseif (!$matchGame->getTournoi()) {
-                $this->addFlash('error', 'Match doit appartenir à un tournoi');
             } else {
                 $entityManager->flush();
                 return $this->redirectToRoute('app_match_game_index');

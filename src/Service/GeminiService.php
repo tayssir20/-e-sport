@@ -11,13 +11,17 @@ class GeminiService
         $this->apiKey = $apiKey;
     }
 
-    public function chat(string $userMessage, array $history = [], string $productContext = ''): string
+    public function chat(string $userMessage, array $history = [], string $productContext = '', string $systemPromptOverride = ''): string
     {
         $messages = [];
 
-       $messages[] = [
-    'role' => 'system',
-    'content' => "Tu es un assistant expert pour une boutique e-gaming. Tu réponds en français.
+        if ($systemPromptOverride !== '') {
+            // Contexte personnalisé (e-sport, tournoi, équipe…)
+            $messages[] = ['role' => 'system', 'content' => $systemPromptOverride];
+        } else {
+            $messages[] = [
+                'role' => 'system',
+                'content' => "Tu es un assistant expert pour une boutique e-gaming. Tu réponds en français.
     Règles STRICTES :
     - Réponds toujours de façon courte (2-3 lignes maximum)
     - N'affiche JAMAIS une liste de produits sans qu'on te le demande
@@ -26,7 +30,8 @@ class GeminiService
     - Pose des questions pour mieux orienter le client
     - Sois naturel comme un vrai vendeur en magasin
     \n" . $productContext
-];
+            ];
+        }
 
         foreach ($history as $msg) {
             $messages[] = [

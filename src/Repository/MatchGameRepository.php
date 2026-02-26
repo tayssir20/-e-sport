@@ -21,6 +21,23 @@ class MatchGameRepository extends ServiceEntityRepository
     /**
      * @return MatchGame[]
      */
+    public function search(string $query): array
+    {
+        return $this->createQueryBuilder('m')
+            ->leftJoin('m.equipe1', 'e1')
+            ->leftJoin('m.equipe2', 'e2')
+            ->where('e1.nom LIKE :q')
+            ->orWhere('e2.nom LIKE :q')
+            ->orWhere('m.statut LIKE :q')
+            ->setParameter('q', '%' . $query . '%')
+            ->orderBy('m.dateMatch', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return MatchGame[]
+     */
     public function findByTournoi(Tournoi $tournoi): array
     {
         return $this->createQueryBuilder('m')
