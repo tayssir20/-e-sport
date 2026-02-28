@@ -11,7 +11,7 @@
         "beberlei/doctrineextensions": "^1.5",
         "doctrine/doctrine-bundle": "^2.18.2",
         "doctrine/doctrine-migrations-bundle": "^3.7",
-        "doctrine/orm": "^3.6.2",
+        "doctrine/orm": "^3.6",
         "excelwebzone/recaptcha-bundle": "^1.5.42",
         "heroyt/tournament-generator": ">=0.5.5",
         "knplabs/knp-paginator-bundle": "^6.10",
