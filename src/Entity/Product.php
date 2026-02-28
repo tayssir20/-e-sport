@@ -8,6 +8,10 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Category;
 use Symfony\Component\Validator\Constraints as Assert;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+
+
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
@@ -121,6 +125,32 @@ public function setCategory(?Category $category): self
 {
     $this->category = $category;
     return $this;
+}
+// Dans src/Entity/Product.php, ajouter :
+
+#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductRating::class, cascade: ['remove'])]
+private Collection $ratings;
+
+public function __construct()
+{
+    $this->ratings = new ArrayCollection();
+}
+
+public function getRatings(): Collection
+{
+    return $this->ratings;
+}
+
+public function getAverageRating(): float
+{
+    if ($this->ratings->isEmpty()) return 0;
+    $total = array_sum($this->ratings->map(fn($r) => $r->getStars())->toArray());
+    return round($total / $this->ratings->count(), 1);
+}
+
+public function getRatingCount(): int
+{
+    return $this->ratings->count();
 }
 
 }

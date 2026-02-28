@@ -31,6 +31,22 @@ public function findTopSales(int $limit = 3): array
         ->getQuery()
         ->getResult();
 }
+public function search(string $term): array
+{
+    return $this->createQueryBuilder('p')
+        ->where('p.name LIKE :term')
+        ->setParameter('term', '%' . $term . '%')
+        ->getQuery()
+        ->getResult();
+}
+
+public function findAllOrdered(): array
+{
+    return $this->createQueryBuilder('p')
+        ->orderBy('p.id', 'DESC')
+        ->getQuery()
+        ->getResult();
+}
     //    /**
     //     * @return Product[] Returns an array of Product objects
     //     */

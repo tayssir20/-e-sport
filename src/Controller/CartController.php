@@ -56,6 +56,8 @@ $cart = $this->cartService->getCart($user);
     #[Route('/add/{id}', name: 'app_cart_add', methods: ['POST'])]
     public function add(Product $product, Request $request): JsonResponse
     {
+        $this->productRepository->find($product->getId());
+        
         // if AJAX call comes from an anonymous user we want a JSON response, not a redirect
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return new JsonResponse([

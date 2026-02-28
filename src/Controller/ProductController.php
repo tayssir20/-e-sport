@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use App\Repository\CategoryRepository;
 use Symfony\Component\Routing\Attribute\Route;
 use Knp\Component\Pager\PaginatorInterface;
+use App\Repository\ProductRatingRepository;
 #[Route('/product')]
 final class ProductController extends AbstractController
 {
@@ -126,21 +127,35 @@ $wishlistItems = $wishlistRepository->findByUser($user);
         ]);
     }
 
-   #[Route('/{id}', name: 'app_product_show', methods: ['GET'])]
-public function show(Product $product, \App\Repository\WishlistRepository $wishlistRepository): Response
-{
-    $isInWishlist = false;
-    if ($this->getUser()) {
-       /** @var \App\Entity\User $user */
-$user = $this->getUser();
-        $isInWishlist = $wishlistRepository->isInWishlist($user, $product);
-    }
+#[Route('/{id}', name: 'app_product_show', methods: ['GET'])]
+    public function show(
+        Product $product,
+        \App\Repository\WishlistRepository $wishlistRepository,
+        ProductRatingRepository $ratingRepository
+    ): Response {
+        $isInWishlist = false;
+        if ($this->getUser()) {
+            /** @var \App\Entity\User $user */
+            $user = $this->getUser();
+            $isInWishlist = $wishlistRepository->isInWishlist($user, $product);
+        }
 
-    return $this->render('product/show.html.twig', [
-        'product' => $product,
-        'isInWishlist' => $isInWishlist,
-    ]);
-}
+        $ratings = $ratingRepository->findByProduct($product);
+
+        $userRating = null;
+        if ($this->getUser()) {
+            /** @var \App\Entity\User $user */
+            $user = $this->getUser();
+            $userRating = $ratingRepository->findUserRating($user, $product);
+        }
+
+        return $this->render('product/show.html.twig', [
+            'product' => $product,
+            'isInWishlist' => $isInWishlist,
+            'ratings' => $ratings,
+            'userRating' => $userRating,
+        ]);
+    }
 
     #[Route('/{id}/edit', name: 'app_product_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Product $product, EntityManagerInterface $entityManager): Response
