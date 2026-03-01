@@ -2,9 +2,7 @@
 # Full documentation: https://github.com/ahmed-bhs/doctrine-doctor/blob/main/docs/CONFIGURATION.md
 
 doctrine_doctor:
-    # Enable Doctrine Doctor (automatically enabled in dev/test environments)
     enabled: true
-
 #    # Web Profiler integration
 #    profiler:
 #        show_in_toolbar: true

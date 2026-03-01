@@ -6,6 +6,7 @@ use App\Repository\ResetPasswordRequestRepository;
 use Doctrine\ORM\Mapping as ORM;
 use SymfonyCasts\Bundle\ResetPassword\Model\ResetPasswordRequestInterface;
 use SymfonyCasts\Bundle\ResetPassword\Model\ResetPasswordRequestTrait;
+use Symfony\Component\Serializer\At\Ignore;
 
 #[ORM\Entity(repositoryClass: ResetPasswordRequestRepository::class)]
 class ResetPasswordRequest implements ResetPasswordRequestInterface
@@ -21,7 +22,7 @@ class ResetPasswordRequest implements ResetPasswordRequestInterface
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    public function __construct(User $user, \DateTimeImmutable $expiresAt, string $selector, string $hashedToken)
+    public function __construct(User $user, \DateTimeImmutable $expiresAt, string $selector, #[\SensitiveParameter] string $hashedToken)
     {
         $this->user = $user;
         $this->initialize($expiresAt, $selector, $hashedToken);
@@ -41,5 +42,10 @@ class ResetPasswordRequest implements ResetPasswordRequestInterface
     {
         $this->user = $user;
         return $this;
+    }
+    
+    public function getHashedToken(): string
+    {
+        return $this->hashedToken;
     }
 }

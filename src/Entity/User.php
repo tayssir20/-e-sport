@@ -8,6 +8,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Serializer\Attribute\Ignore;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -22,23 +23,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\NotBlank]
     #[Assert\Email]
-    private ?string $email = null;
+    private string $email = '';
 
     #[ORM\Column(type: 'json')]
     private array $roles = [];
 
     #[ORM\Column]
-    private ?string $password = null;
+    #[Ignore]
+    private string $password = '';
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 3)]
-    private ?string $nom = null;
+    private string $nom = '';
 
     #[ORM\Column(type: 'boolean')]
     private bool $isActive = true;
 
     #[ORM\Column(name: 'google2fa_secret', type: 'string', length: 255, nullable: true)]
+    #[Ignore]
     private ?string $google2faSecret = null;
 
     #[ORM\Column(name: 'is_2fa_enabled', type: 'boolean')]
@@ -51,6 +54,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $oauthProvider = null;
 
     #[ORM\Column(name: 'face_encoding', type: 'text', nullable: true)]
+    
     private ?string $faceEncoding = null;
 
     #[ORM\Column(name: 'is_face_enabled', type: 'boolean')]
@@ -66,9 +70,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->id;
     }
 
-    public function getEmail(): ?string
+    public function getEmail(): string
     {
-        return $this->email;
+        return (string) $this->email;
     }
 
     public function setEmail(string $email): static
@@ -98,7 +102,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return (string) $this->password;
     }
 
-    public function setPassword(string $password): static
+    public function setPassword(#[\SensitiveParameter] string $password): static
     {
         $this->password = $password;
         return $this;
@@ -106,9 +110,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void {}
 
-    public function getNom(): ?string
+    public function getNom(): string
     {
-        return $this->nom;
+        return (string) $this->nom;
     }
 
     public function setNom(string $nom): static
@@ -133,7 +137,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->google2faSecret;
     }
 
-    public function setGoogle2faSecret(?string $google2faSecret): static
+    public function setGoogle2faSecret(#[\SensitiveParameter] ?string $google2faSecret): static
     {
         $this->google2faSecret = $google2faSecret;
         return $this;

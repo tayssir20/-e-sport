@@ -21,13 +21,13 @@ class OrderItem
     #[ORM\JoinColumn(nullable: false)]
     private ?Product $product = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $productName = null;
 
-    #[ORM\Column]
-    private ?float $productPrice = null;
+   #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
+private ?string $productPrice = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $quantity = null;
 
     public function getId(): ?int { return $this->id; }
@@ -40,15 +40,16 @@ class OrderItem
 
     public function getProductName(): ?string { return $this->productName; }
     public function setProductName(string $v): static { $this->productName = $v; return $this; }
+public function getProductPrice(): ?string { return $this->productPrice; }
+public function setProductPrice(string|float|int $v): static { $this->productPrice = (string) $v; return $this; }
 
-    public function getProductPrice(): ?float { return $this->productPrice; }
-    public function setProductPrice(float $v): static { $this->productPrice = $v; return $this; }
+public function getSubtotal(): string
+{
+    return (string) (((float) $this->productPrice) * $this->quantity);
+}
 
     public function getQuantity(): ?int { return $this->quantity; }
     public function setQuantity(int $v): static { $this->quantity = $v; return $this; }
 
-    public function getSubtotal(): float
-    {
-        return $this->productPrice * $this->quantity;
-    }
+    
 }

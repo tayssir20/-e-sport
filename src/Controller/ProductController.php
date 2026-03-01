@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use App\Repository\CategoryRepository;
 use Symfony\Component\Routing\Attribute\Route;
 use Knp\Component\Pager\PaginatorInterface;
+use App\Repository\ProductRatingRepository;
 #[Route('/product')]
 final class ProductController extends AbstractController
 {
@@ -28,7 +29,8 @@ public function index2(
     Request $request,
     ProductRepository $productRepository,
     CategoryRepository $categoryRepository,
-    PaginatorInterface $paginator
+    PaginatorInterface $paginator,
+    \App\Repository\WishlistRepository $wishlistRepository
 ): Response {
 
     $searchTerm = $request->query->get('search', '');
@@ -41,18 +43,28 @@ public function index2(
             ->setParameter('term', '%'.$searchTerm.'%');
     }
 
-    $query = $queryBuilder->getQuery();
-
     $products = $paginator->paginate(
-        $query,
+        $queryBuilder->getQuery(),
         $request->query->getInt('page', 1),
-        6 // 6 produits par page
+        6
     );
+
+    $wishlistIds = [];
+    if ($this->getUser()) {
+       /** @var \App\Entity\User $user */
+$user = $this->getUser();
+$wishlistItems = $wishlistRepository->findByUser($user);
+        $wishlistIds = array_map(
+            fn($item) => $item->getProduct()->getId(),
+            $wishlistItems
+        );
+    }
 
     return $this->render('product/index2.html.twig', [
         'products' => $products,
         'categories' => $categoryRepository->findAll(),
         'searchTerm' => $searchTerm,
+        'wishlistIds' => $wishlistIds,
     ]);
 }
 
@@ -62,24 +74,35 @@ public function byCategoryIndex2(
     Request $request,
     ProductRepository $productRepository,
     CategoryRepository $categoryRepository,
-    PaginatorInterface $paginator
+    PaginatorInterface $paginator,
+    \App\Repository\WishlistRepository $wishlistRepository
 ): Response {
 
     $queryBuilder = $productRepository->createQueryBuilder('p')
         ->where('p.category = :category')
         ->setParameter('category', $category);
 
-    $query = $queryBuilder->getQuery();
-
     $products = $paginator->paginate(
-        $query,
+        $queryBuilder->getQuery(),
         $request->query->getInt('page', 1),
         6
     );
 
+    $wishlistIds = [];
+    if ($this->getUser()) {
+       /** @var \App\Entity\User $user */
+$user = $this->getUser();
+$wishlistItems = $wishlistRepository->findByUser($user);
+        $wishlistIds = array_map(
+            fn($item) => $item->getProduct()->getId(),
+            $wishlistItems
+        );
+    }
+
     return $this->render('product/index2.html.twig', [
         'products' => $products,
         'categories' => $categoryRepository->findAll(),
+        'wishlistIds' => $wishlistIds,
     ]);
 }
 
@@ -104,11 +127,33 @@ public function byCategoryIndex2(
         ]);
     }
 
-    #[Route('/{id}', name: 'app_product_show', methods: ['GET'])]
-    public function show(Product $product): Response
-    {
+#[Route('/{id}', name: 'app_product_show', methods: ['GET'])]
+    public function show(
+        Product $product,
+        \App\Repository\WishlistRepository $wishlistRepository,
+        ProductRatingRepository $ratingRepository
+    ): Response {
+        $isInWishlist = false;
+        if ($this->getUser()) {
+            /** @var \App\Entity\User $user */
+            $user = $this->getUser();
+            $isInWishlist = $wishlistRepository->isInWishlist($user, $product);
+        }
+
+        $ratings = $ratingRepository->findByProduct($product);
+
+        $userRating = null;
+        if ($this->getUser()) {
+            /** @var \App\Entity\User $user */
+            $user = $this->getUser();
+            $userRating = $ratingRepository->findUserRating($user, $product);
+        }
+
         return $this->render('product/show.html.twig', [
             'product' => $product,
+            'isInWishlist' => $isInWishlist,
+            'ratings' => $ratings,
+            'userRating' => $userRating,
         ]);
     }
 

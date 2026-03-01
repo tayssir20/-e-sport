@@ -86,7 +86,7 @@
                                 {% if blog.category %}
                                     <p class="text-muted mb-1">{{ blog.category }}</p>
                                 {% endif %}
-                                <small class="text-muted mb-3 d-block">{{ blog.createdAt|date('d M Y') }}</small>
+                               <small class="text-muted mb-3 d-block">{{ blog.createdAt|ago }}</small>
 
                                 <!-- ⭐ RATING STARS ONLY -->
                                 <div class="mb-3">
@@ -110,7 +110,7 @@
                                         <div class="comment mb-2" style="color: #000000;">
                                             <strong>{{ comment.user.nom }}</strong>:
                                             {{ comment.content }}
-                                            <small class="ms-1" style="color: #000000;">{{ comment.createdAt|date('d M Y H:i') }}</small>
+                                          <small class="ms-1" style="color: #000000;">{{ comment.createdAt|ago }}</small>
                                         </div>
                                     {% else %}
                                         <p style="color: #000000;">No comments yet.</p>
@@ -273,5 +273,49 @@ document.addEventListener('DOMContentLoaded', function() {
     cursor: not-allowed;
 }
 </style>
-
+<div id="ai-chat-widget" style="position:fixed; bottom:24px; right:24px; width:340px; font-family:sans-serif; z-index:1000;">
+    <div style="background:#6366f1; color:white; padding:12px 16px; border-radius:12px 12px 0 0; font-weight:bold;">
+        🤖 Blog Assistant
+    </div>
+    <div id="chat-messages" style="background:#f9f9f9; height:280px; overflow-y:auto; padding:12px; border-left:1px solid #ddd; border-right:1px solid #ddd; color:#000;">
+        <p style="color:#888; font-size:13px;">Ask me anything about the blog posts!</p>
+    </div>
+    <div style="display:flex; border:1px solid #ddd; border-radius:0 0 12px 12px; overflow:hidden;">
+        <input id="chat-input" type="text" placeholder="Search or ask..."
+               style="flex:1; padding:10px; border:none; outline:none;" />
+        <button onclick="sendMessage()" 
+                style="background:#6366f1; color:white; border:none; padding:10px 16px; cursor:pointer;">
+            ➤
+        </button>
+    </div>
+</div>
+<script>
+async function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const messages = document.getElementById('chat-messages');
+    const userText = input.value.trim();
+    if (!userText) return;
+    messages.innerHTML += `<p style="color:#000;"><strong>You:</strong> ${userText}</p>`;
+    input.value = '';
+    messages.innerHTML += `<p id="typing" style="color:#aaa;">AI is thinking...</p>`;
+    messages.scrollTop = messages.scrollHeight;
+    try {
+        const res = await fetch('/blog/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: userText })
+        });
+        const data = await res.json();
+        document.getElementById('typing')?.remove();
+        messages.innerHTML += `<p style="color:#000;"><strong>🤖 AI:</strong> ${data.reply}</p>`;
+    } catch (e) {
+        document.getElementById('typing')?.remove();
+        messages.innerHTML += `<p style="color:red;">Error contacting AI.</p>`;
+    }
+    messages.scrollTop = messages.scrollHeight;
+}
+document.getElementById('chat-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendMessage();
+});
+</script>
 {% endblock %}

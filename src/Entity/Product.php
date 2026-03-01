@@ -8,6 +8,10 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Category;
 use Symfony\Component\Validator\Constraints as Assert;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+
+
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
@@ -19,27 +23,27 @@ class Product
 
     #[Assert\NotBlank(message: "Le nom est obligatoire")]
     #[Assert\Length(min: 3, minMessage: "Le nom doit contenir au moins {{ limit }} caractères")]
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $name = null;
 
     #[Assert\NotBlank(message: "La description est obligatoire")]
     #[Assert\Length(min: 5, minMessage: "La description doit contenir au moins {{ limit }} caractères")]
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
     #[Assert\NotBlank(message: "Le prix est obligatoire")]
     #[Assert\Positive(message: "Le prix doit être un nombre positif")]
-    #[ORM\Column]
-    private ?float $price = null;
+   #[ORM\Column(type: 'decimal', precision: 10, scale: 2,nullable: true)]
+private ?string $price = null;
 
     #[Assert\NotBlank(message: "Le stock est obligatoire")]
     #[Assert\Positive(message: "Le stock doit être un nombre positif")]
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $stock = null;
 
     #[Assert\NotBlank(message: "L'image est obligatoire")]
     #[Assert\Url(message: "Veuillez entrer une URL valide")]
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
 
     #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'products')]
@@ -77,17 +81,16 @@ class Product
         return $this;
     }
 
-    public function getPrice(): ?float
-    {
-        return $this->price;
-    }
+  public function getPrice(): ?string
+{
+    return $this->price;
+}
 
-    public function setPrice(float $price): static
-    {
-        $this->price = $price;
-
-        return $this;
-    }
+public function setPrice(string|float|int $price): static
+{
+    $this->price = (string) $price;
+    return $this;
+}
 
     public function getStock(): ?int
     {
@@ -121,6 +124,32 @@ public function setCategory(?Category $category): self
 {
     $this->category = $category;
     return $this;
+}
+// Dans src/Entity/Product.php, ajouter :
+
+#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductRating::class, cascade: ['remove'])]
+private Collection $ratings;
+
+public function __construct()
+{
+    $this->ratings = new ArrayCollection();
+}
+
+public function getRatings(): Collection
+{
+    return $this->ratings;
+}
+
+public function getAverageRating(): float
+{
+    if ($this->ratings->isEmpty()) return 0;
+    $total = array_sum($this->ratings->map(fn($r) => $r->getStars())->toArray());
+    return round($total / $this->ratings->count(), 1);
+}
+
+public function getRatingCount(): int
+{
+    return $this->ratings->count();
 }
 
 }

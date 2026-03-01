@@ -154,7 +154,7 @@ public function __construct()
     {
         if (!$this->streams->contains($streams)) {
             $this->streams->add($streams);
-            $streams->setMatchGame($this);
+            $streams->setMatchGame($this); // @phpstan-ignore method.notFound
         }
 
         return $this;
@@ -164,8 +164,8 @@ public function __construct()
     {
         if ($this->streams->removeElement($streams)) {
             // set the owning side to null (unless already changed)
-            if ($streams->getMatchGame() === $this) {
-                $streams->setMatchGame(null);
+            if ($streams->getMatchGame() === $this) { // @phpstan-ignore method.notFound
+                $streams->setMatchGame(null); // @phpstan-ignore method.notFound
             }
         }
 

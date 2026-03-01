@@ -23,6 +23,7 @@ class TwoFactorAuthController extends AbstractController
         EntityManagerInterface $entityManager,
         ?LoggerInterface $logger = null
     ): Response {
+        $user = null;
         try {
             $user = $this->getUser();
             
@@ -71,7 +72,7 @@ class TwoFactorAuthController extends AbstractController
         } catch (\Exception $e) {
             // Log the error for debugging
             $userId = null;
-            if ($user instanceof User && method_exists($user, 'getId')) {
+            if ($user instanceof User) {
                 $userId = $user->getId();
             }
             if ($logger) {
@@ -110,8 +111,7 @@ class TwoFactorAuthController extends AbstractController
                 $token = new UsernamePasswordToken(
                     $user,
                     'main',
-                    $user->getRoles(),
-                    ''
+                    $user->getRoles()
                 );
 
                 $tokenStorage->setToken($token);

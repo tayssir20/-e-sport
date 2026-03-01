@@ -130,9 +130,6 @@ class ResetPasswordController extends AbstractController
         } catch (\SymfonyCasts\Bundle\ResetPassword\Exception\ResetPasswordExceptionInterface $e) {
             $this->addFlash('reset_password_error', 'Token generation failed: ' . $e->getMessage() . ' - Reason: ' . $e->getReason());
             return $this->redirectToRoute('app_check_email');
-        } catch (\Exception $e) {
-            $this->addFlash('reset_password_error', 'There was a problem generating your reset token: ' . $e->getMessage());
-            return $this->redirectToRoute('app_check_email');
         }
 
         // Create email with reset link

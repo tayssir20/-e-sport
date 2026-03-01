@@ -27,7 +27,7 @@ class Category
 )]
 
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255 ,nullable: true)]
     private ?string $name = null;
 
     // === Add this property for the inverse relation ===

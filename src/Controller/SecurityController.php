@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Entity\User;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -34,7 +35,7 @@ class SecurityController extends AbstractController
     private function redirectBasedOnUser($user): Response
     {
         // Check if user has ROLE_ADMIN
-        if (method_exists($user, 'getRoles') && in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+        if ($user instanceof User && in_array('ROLE_ADMIN', $user->getRoles(), true)) {
             return $this->redirectToRoute('admin_dashboard');
         }
 

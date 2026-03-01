@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
 class Order
@@ -21,13 +22,13 @@ class Order
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $orderNumber = null;
 
-    #[ORM\Column]
-    private ?float $totalPrice = null;
+   #[ORM\Column(type: 'decimal', precision: 10, scale: 2 ,nullable: true)]
+private ?string $totalPrice = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 50, nullable: true)]
     private ?string $status = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -36,28 +37,28 @@ class Order
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $stripePaymentIntentId = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $firstName = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $lastName = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $email = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $address = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $city = null;
 
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(length: 20, nullable: true)]
     private ?string $postalCode = null;
 
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(length: 20, nullable: true)]
     private ?string $phone = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
@@ -82,8 +83,8 @@ class Order
     public function getOrderNumber(): ?string { return $this->orderNumber; }
     public function setOrderNumber(string $v): static { $this->orderNumber = $v; return $this; }
 
-    public function getTotalPrice(): ?float { return $this->totalPrice; }
-    public function setTotalPrice(float $v): static { $this->totalPrice = $v; return $this; }
+   public function getTotalPrice(): ?string { return $this->totalPrice; }
+public function setTotalPrice(string|float|int $v): static { $this->totalPrice = (string) $v; return $this; }
 
     public function getStatus(): ?string { return $this->status; }
     public function setStatus(string $v): static { $this->status = $v; return $this; }

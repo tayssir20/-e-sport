@@ -1,4 +1,6 @@
 parameters:
-    level: 5
+    level: 8
     paths:
         - src
+    ignoreErrors:
+        - '#Property App\\Entity\\[a-zA-Z]+::\$id \(int\|null\) is never assigned int#'

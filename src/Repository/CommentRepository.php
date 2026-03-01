@@ -36,4 +36,12 @@ class CommentRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+    public function search(string $term)
+{
+    return $this->createQueryBuilder('c')
+                ->where('c.content LIKE :term')
+                ->setParameter('term', '%'.$term.'%')
+                ->getQuery()
+                ->getResult();
+}
 }

@@ -145,11 +145,11 @@ final class BlogController extends AbstractController
             throw $this->createNotFoundException('Blog not found.');
         }
 
-        $user = $this->getUser();
-        if (!$user) {
-            $this->addFlash('error', 'You must be logged in to comment.');
-            return $this->redirectToRoute('app_blog_user_index');
-        }
+$user = $this->getUser();
+if (!$user instanceof \App\Entity\User) {
+    $this->addFlash('error', 'You must be logged in to comment.');
+    return $this->redirectToRoute('app_blog_user_index');
+}
 
         // 🔐 VALIDATION RECAPTCHA
         $recaptchaResponse = $request->request->get('g-recaptcha-response');
@@ -212,11 +212,12 @@ final class BlogController extends AbstractController
     #[Route('/{id}/rate', name: 'app_blog_rate', methods: ['POST'])]
     public function rate(Request $request, Blog $blog, EntityManagerInterface $em, RatingRepository $ratingRepository): Response
     {
+        
         $user = $this->getUser();
-        if (!$user) {
-            $this->addFlash('error', 'You must be logged in to rate.');
-            return $this->redirectToRoute('app_blog_user_index');
-        }
+if (!$user instanceof \App\Entity\User) {
+    $this->addFlash('error', 'You must be logged in to rate.');
+    return $this->redirectToRoute('app_blog_user_index');
+}
 
         $value = (int)$request->request->get('value');
         if ($value < 1 || $value > 5) {

@@ -8,19 +8,22 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Repository\ProductRepository;
 
 final class HomeController extends AbstractController
 {
-    #[Route('/', name: 'app_home')]
-    public function index(EntityManagerInterface $entityManager): Response
-    {
-        $ranking = $this->computeGlobalRanking($entityManager);
+   #[Route('/', name: 'app_home')]
+public function index(EntityManagerInterface $entityManager, ProductRepository $productRepository): Response
+{
+    $ranking = $this->computeGlobalRanking($entityManager);
+    $topSales = $productRepository->findTopSales(3);
 
-        return $this->render('home/index.html.twig', [
-            'controller_name' => 'HomeController',
-            'ranking' => $ranking,
-        ]);
-    }
+    return $this->render('home/index.html.twig', [
+        'controller_name' => 'HomeController',
+        'ranking' => $ranking,
+        'topSales' => $topSales,
+    ]);
+}
 
     private function computeGlobalRanking(EntityManagerInterface $entityManager): array
     {
@@ -31,6 +34,7 @@ final class HomeController extends AbstractController
             ->getQuery()
             ->getResult();
 
+        /** @var array<int|null, array{equipe: Equipe, mj: int, v: int, n: int, p: int, bp: int, bc: int, pts?: int, diff?: int, ppm?: float, badge?: string}> $stats */
         $stats = [];
         foreach ($allTeams as $team) {
             $id = $team->getId();

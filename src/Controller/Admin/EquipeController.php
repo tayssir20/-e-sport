@@ -37,7 +37,7 @@ class EquipeController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var UploadedFile $logoFile */
+            /** @var UploadedFile|null $logoFile */
             $logoFile = $form->get('logo')->getData();
 
             if ($logoFile) {
@@ -101,14 +101,14 @@ class EquipeController extends AbstractController
             }
         }
 
-        $gameName = $result['game'] ?? $jeu->getNom();
+        $gameName = $result['game'];
 
         if ($result['created'] > 0) {
             $this->addFlash('success', sprintf(
                 '%d équipe(s) « %s » importée(s) avec succès ! (Owner: %s)',
                 $result['created'],
                 $gameName,
-                $admin->getNom() ?? $admin->getEmail()
+                $admin->getNom() ?: $admin->getEmail()
             ));
         }
 
@@ -142,7 +142,7 @@ class EquipeController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var UploadedFile $logoFile */
+            /** @var UploadedFile|null $logoFile */
             $logoFile = $form->get('logo')->getData();
 
             if ($logoFile) {

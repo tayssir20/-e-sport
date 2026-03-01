@@ -10,6 +10,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Form\ProfileEditType;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\User;
 
 class ProfileController extends AbstractController
 {
@@ -17,6 +18,9 @@ class ProfileController extends AbstractController
     public function profile(): Response
     {
         $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         return $this->render('profile/index.html.twig', ['user' => $user]);
@@ -29,6 +33,9 @@ class ProfileController extends AbstractController
         EntityManagerInterface $em
     ): Response {
         $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         $form = $this->createForm(ProfileEditType::class, $user);

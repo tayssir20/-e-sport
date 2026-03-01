@@ -22,9 +22,11 @@ class Equipe
 
     #[ORM\ManyToMany(targetEntity: User::class)]
     #[Assert\Count(max: 5, maxMessage: "Une équipe ne peut pas avoir plus de {{ limit }} membres.")]
+    /** @var Collection<int, User> */
     private Collection $members;
 
     #[ORM\ManyToMany(targetEntity: Tournoi::class, inversedBy: 'equipes')]
+    /** @var Collection<int, Tournoi> */
     private Collection $Tournois;
     #[ORM\Column(type: 'integer')]
     #[Assert\Range(min: 1, max: 100, notInRangeMessage: "Le nombre maximum de membres doit être entre {{ min }} et {{ max }}.")]
@@ -61,6 +63,9 @@ public function setNom(string $nom): self
 }
 
 
+    /**
+     * @return Collection<int, Tournoi>
+     */
     public function getTournois(): Collection
     {
         return $this->Tournois;
@@ -80,6 +85,9 @@ public function setNom(string $nom): self
         return $this;
     }
 
+    /**
+     * @return Collection<int, User>
+     */
     public function getMembers(): Collection
     {
         return $this->members;

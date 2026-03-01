@@ -19,8 +19,9 @@ class CheckoutController extends AbstractController
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
-        $user = $this->getUser();
-        $cart = $this->cartService->getCart($user);
+       /** @var \App\Entity\User $user */
+$user = $this->getUser();
+$cart = $this->cartService->getCart($user);
 
         if ($cart->getItems()->count() === 0) {
             $this->addFlash('warning', 'Your cart is empty');

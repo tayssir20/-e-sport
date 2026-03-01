@@ -4,7 +4,6 @@ namespace App\Security;
 
 use App\Entity\User;
 use App\Service\FaceRecognitionService;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -23,7 +22,6 @@ class FaceAuthenticator extends AbstractAuthenticator
 
     public function __construct(
         private FaceRecognitionService $faceRecognitionService,
-        private EntityManagerInterface $entityManager,
         private UrlGeneratorInterface $urlGenerator
     ) {}
 

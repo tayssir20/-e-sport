@@ -40,17 +40,16 @@ class Blog
     private ?string $imageName = null;
 
     #[ORM\Column]
-    private ?int $commentCount = 0;
+    private int $commentCount = 0;
 
     #[ORM\OneToMany(mappedBy: 'blog', targetEntity: Comment::class, cascade: ['remove'], orphanRemoval: true)]
     private Collection $comments;
 
     /**
-     * @ORM\OneToMany(mappedBy: 'blog', targetEntity: Rating::class, cascade: ['persist', 'remove'], orphanRemoval: true)
-     */
-    #[ORM\OneToMany(mappedBy: 'blog', targetEntity: Rating::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    private Collection $ratings;
-
+ * @ORM\OneToMany(mappedBy="blog", targetEntity=Rating::class, cascade={"persist","remove"}, orphanRemoval=true)
+ */
+#[ORM\OneToMany(mappedBy: 'blog', targetEntity: Rating::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+private Collection $ratings;
     public function __construct()
     {
         $this->comments = new ArrayCollection();

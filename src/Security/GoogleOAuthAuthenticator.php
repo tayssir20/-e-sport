@@ -56,6 +56,7 @@ class GoogleOAuthAuthenticator extends AbstractAuthenticator implements Authenti
 
         try {
             // Exchange the authorization code for an access token
+            /** @var \League\OAuth2\Client\Token\AccessToken $accessToken */
             $accessToken = $this->googleProvider->getAccessToken('authorization_code', [
                 'code' => $code,
             ]);
@@ -117,7 +118,7 @@ class GoogleOAuthAuthenticator extends AbstractAuthenticator implements Authenti
         $request->getSession()->remove('_security.main.target_path');
 
         // Check if user has ROLE_ADMIN
-        if (is_object($user) && method_exists($user, 'getRoles') && in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+        if ($user instanceof User && in_array('ROLE_ADMIN', $user->getRoles(), true)) {
             return new RedirectResponse($this->urlGenerator->generate('admin_dashboard'));
         }
 
