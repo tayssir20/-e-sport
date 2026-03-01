@@ -31,8 +31,8 @@ class Stream
     /**
      * @var Collection<int, StreamReaction>
      */
-    #[ORM\OneToMany(mappedBy: 'stream', targetEntity: StreamReaction::class)]
-    private Collection $reactions;
+    #[ORM\OneToMany(mappedBy: 'stream', targetEntity: StreamReaction::class, orphanRemoval: true, cascade: ['persist', 'remove'])]
+private Collection $reactions;
 
     // Champ pour VichUploader
     #[UploadableField(mapping: 'stream_video', fileNameProperty: 'url')]
@@ -56,11 +56,11 @@ class Stream
         return $this->url;
     }
 
-    public function setUrl(string $url): static
-    {
-        $this->url = $url;
-        return $this;
-    }
+   public function setUrl(?string $url): static
+{
+    $this->url = $url;
+    return $this;
+}
 
     public function isActive(): ?bool
     {
