@@ -24,14 +24,14 @@ class ProductRating
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Product $product = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     #[Assert\Range(min: 1, max: 5)]
     private ?int $stars = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $comment = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $createdAt = null;
 
     public function __construct()

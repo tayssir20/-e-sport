@@ -58,7 +58,7 @@ public function findTopSales(int $limit = 3): array
         ->getQuery()
         ->getResult();
 }
-public function search(string $term): array
+public function searchh(string $term): array
 {
     return $this->createQueryBuilder('p')
         ->where('p.name LIKE :term')
@@ -67,7 +67,7 @@ public function search(string $term): array
         ->getResult();
 }
 
-public function findAllOrdered(): array
+public function findAllOrderedd(): array
 {
     return $this->createQueryBuilder('p')
         ->orderBy('p.id', 'DESC')
