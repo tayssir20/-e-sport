@@ -34,6 +34,7 @@ public function index(EntityManagerInterface $entityManager, ProductRepository $
             ->getQuery()
             ->getResult();
 
+        /** @var array<int|null, array{equipe: Equipe, mj: int, v: int, n: int, p: int, bp: int, bc: int, pts?: int, diff?: int, ppm?: float, badge?: string}> $stats */
         $stats = [];
         foreach ($allTeams as $team) {
             $id = $team->getId();

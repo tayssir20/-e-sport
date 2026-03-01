@@ -39,6 +39,7 @@ final class MatchGameController extends AbstractController
      */
     private function computeClassement(array $matchGames, array $equipesInscrites): array
     {
+        /** @var array<int|null, array{equipe: \App\Entity\Equipe, mj: int, v: int, n: int, p: int, bp: int, bc: int, pts: int, diff: int}> $stats */
         $stats = [];
         foreach ($equipesInscrites as $equipe) {
             $id = $equipe->getId();
