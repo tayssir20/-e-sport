@@ -6,48 +6,75 @@ use App\Entity\Stream;
 use App\Entity\StreamReaction;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class StreamController extends AbstractController
+class StreamController extends AbstractController
 {
+    // Page publique live
     #[Route('/live', name: 'app_stream_index')]
-    public function index(EntityManagerInterface $entityManager): Response
+    public function index(EntityManagerInterface $em)
     {
-        $stream = $entityManager
-            ->getRepository(Stream::class)
-            ->findOneBy(['isActive' => true]);
+        // Récupérer le stream actif
+        $activeStream = $em->getRepository(Stream::class)
+            ->findOneBy(['isActive' => true], ['createdAt' => 'DESC']);
+
+        // Récupérer les autres vidéos non actives
+        $videos = $em->getRepository(Stream::class)
+            ->createQueryBuilder('s')
+            ->where('s.isActive = false')
+            ->orderBy('s.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
 
         return $this->render('stream/index.html.twig', [
-            'stream' => $stream
+            'activeStream' => $activeStream,
+            'videos' => $videos,
         ]);
     }
 
-    #[Route('/stream/interact/{id}', name: 'stream_interact', methods: ['POST'])]
-    public function interact(
-        Stream $stream,
-        Request $request,
-        EntityManagerInterface $em
-    ): JsonResponse {
+    // AJAX pour les réactions (boutons + commentaires)
+    #[Route('/stream/react/{id}', name: 'stream_interact', methods: ['POST'])]
+    public function react(Stream $stream, Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        try {
+            // Vérification CSRF
+            $csrfToken = $request->headers->get('X-CSRF-TOKEN');
+            if (!$this->isCsrfTokenValid('stream_react', $csrfToken)) {
+                return new JsonResponse(['error' => 'Token CSRF invalide'], 403);
+            }
 
-        $data = json_decode($request->getContent(), true);
+            $data = json_decode($request->getContent(), true);
+            $type = $data['type'] ?? 'comment';
+            $comment = $data['comment'] ?? null;
+            $username = $this->getUser()?->getUserIdentifier() ?? 'Guest';
 
-        $reaction = new StreamReaction();
-        $reaction->setType($data['type'] ?? 'comment');
-        $reaction->setComment($data['comment'] ?? null);
-        $reaction->setUsername($this->getUser()?->getUserIdentifier() ?? 'Guest');
-        $reaction->setCreatedAt(new \DateTimeImmutable());
-        $reaction->setStream($stream);
+            // Créer la réaction
+            $reaction = new StreamReaction();
+            $reaction->setType($type);
+            $reaction->setComment($comment);
+            $reaction->setUsername($username);
+            $reaction->setCreatedAt(new \DateTimeImmutable());
+            $reaction->setStream($stream);
 
-        $em->persist($reaction);
-        $em->flush();
+            $em->persist($reaction);
+            $em->flush();
 
-        return $this->json([
-            'username' => $reaction->getUsername(),
-            'comment' => $reaction->getComment(),
-            'type' => $reaction->getType()
-        ]);
+            // Compter les réactions du même type
+            $count = count(
+                $em->getRepository(StreamReaction::class)
+                    ->findBy(['stream' => $stream, 'type' => $type])
+            );
+
+            return $this->json([
+                'username' => $username,
+                'comment' => $comment,
+                'type' => $type,
+                'count' => $count,
+            ]);
+        } catch (\Throwable $e) {
+            return new JsonResponse(['error' => $e->getMessage()], 500);
+        }
     }
 }
