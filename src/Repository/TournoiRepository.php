@@ -115,4 +115,20 @@ class TournoiRepository extends ServiceEntityRepository
         }
         return $rejoignables;
     }
+
+    /**
+     * Retourne les tournois "En Attente" dont la date limite d'inscription est passée.
+     *
+     * @return Tournoi[]
+     */
+    public function findTournoisReadyForGeneration(\DateTime $now): array
+    {
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.statut = :statut')
+            ->andWhere('t.dateInscriptionLimite <= :now')
+            ->setParameter('statut', 'En Attente')
+            ->setParameter('now', $now)
+            ->getQuery()
+            ->getResult();
+    }
 }

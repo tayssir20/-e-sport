@@ -15,17 +15,19 @@ class GeminiService
         $this->client = $client;
     }
 
-    public function chat(string $userMessage, array $history = [], string $productContext = ''): string
+    public function chat(string $userMessage, array $history = [], string $productContext = '', string $systemPrompt = ''): string
     {
         $messages = [];
 
+        $defaultSystem = "Tu es un assistant expert pour une boutique e-gaming. 
+            R\u00e9ponds en fran\u00e7ais. R\u00e9ponses courtes (2-3 lignes max).
+            Ne liste pas les produits sauf si demand\u00e9.
+            Montre seulement nom + prix sauf demande contraire.
+            Sois naturel.\n" . $productContext;
+
         $messages[] = [
             'role' => 'system',
-            'content' => "Tu es un assistant expert pour une boutique e-gaming. 
-            Réponds en français. Réponses courtes (2-3 lignes max).
-            Ne liste pas les produits sauf si demandé.
-            Montre seulement nom + prix sauf demande contraire.
-            Sois naturel.\n" . $productContext
+            'content' => $systemPrompt !== '' ? $systemPrompt : $defaultSystem
         ];
 
         foreach ($history as $msg) {
