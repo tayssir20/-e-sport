@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\TournoiRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use App\Entity\Equipe;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -73,9 +74,16 @@ class Tournoi
     #[Assert\Length(max: 2000, maxMessage: 'La description ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $description = null;
 
+    /**
+     * @var Collection<int, MatchGame>
+     */
+    #[ORM\OneToMany(targetEntity: MatchGame::class, mappedBy: 'tournoi')]
+    private Collection $matchGames;
+
     public function __construct()
     {
-        $this->equipes = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->equipes = new ArrayCollection();
+        $this->matchGames = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -243,6 +251,35 @@ class Tournoi
     public function setDescription(?string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MatchGame>
+     */
+    public function getMatchGames(): Collection
+    {
+        return $this->matchGames;
+    }
+
+    public function addMatchGame(MatchGame $matchGame): static
+    {
+        if (!$this->matchGames->contains($matchGame)) {
+            $this->matchGames->add($matchGame);
+            $matchGame->setTournoi($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMatchGame(MatchGame $matchGame): static
+    {
+        if ($this->matchGames->removeElement($matchGame)) {
+            if ($matchGame->getTournoi() === $this) {
+                $matchGame->setTournoi(null);
+            }
+        }
 
         return $this;
     }

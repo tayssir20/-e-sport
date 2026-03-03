@@ -42,7 +42,7 @@ class Blog
     #[ORM\Column]
     private int $commentCount = 0;
 
-    #[ORM\OneToMany(mappedBy: 'blog', targetEntity: Comment::class, cascade: ['remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'blog', targetEntity: Comment::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $comments;
 
     /**
